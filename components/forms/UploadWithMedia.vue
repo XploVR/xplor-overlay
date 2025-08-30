@@ -1,84 +1,77 @@
 ﻿<script setup lang="ts">
-import { ref, computed } from 'vue'
-import BaseListingForm from '~/components/forms/BaseListingForm.vue'
+import { ref } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 
-type SpaceKind = 'real_estate'|'yacht'|'gallery'|'hotel'|'restaurant'|'museum'|'vehicle'
-type BaseListing = { id?: string }
-type CreatedListing = { id: string | undefined }
-
-const props = defineProps<{ kind: SpaceKind }>()
-const created = ref<CreatedListing | null>(null)
-const createdId = computed(() => created.value?.id || '')
-const pendingFiles = ref<File[]>([])
+const props = defineProps<{ kind: 'real_estate' | 'yacht' | 'gallery' }>()
+const created = ref<any | null>(null)
 
 const cfg = useRuntimeConfig().public
 const supa = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey)
-const bucket = 'property-media'
 
-function makeSafeKey(name: string) {
-  return name
-    .normalize('NFKD')
-    .replace(/[^\w.-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
+const files = ref<FileList | null>(null)
+const uploading = ref(false)
+const uploadErr = ref<string | null>(null)
+
+function onCreated(row: any) {
+  created.value = row
 }
 
-function onCreated(listing: BaseListing) {
-  created.value = { id: listing.id ?? undefined }
-}
+async function upload() {
+  uploadErr.value = null
+  if (!created.value?.id) { uploadErr.value = 'Create a draft first.'; return }
+  if (!files.value?.length) { uploadErr.value = 'Pick at least one image.'; return }
 
-async function uploadMedia() {
-  if (!createdId.value) { console.warn('[upload] no property id'); return }
-  if (!pendingFiles.value.length) { console.warn('[upload] no files'); return }
+  uploading.value = true
+  const propertyId = created.value.id
+  const items: { kind:'image'; url:string; position:number }[] = []
 
-  const propertyId = createdId.value
-  const uploaded: { kind: 'image'; url: string; position: number }[] = []
+  try {
+    for (let i = 0; i < files.value.length; i++) {
+      const file = files.value[i]
+      if (!file) continue
+      const path = `${propertyId}/${Date.now()}-${i}-${file.name}`
+      const { error: upErr } = await supa
+        .storage
+        .from('property-media')
+        .upload(path, file, { upsert: false })
+      if (upErr) { uploadErr.value = upErr.message; continue }
 
-  for (const [i, file] of pendingFiles.value.entries()) {
-    const path = `${propertyId}/${Date.now()}-${i}-${makeSafeKey(file.name)}`
-    const { error: upErr } = await supa.storage.from(bucket).upload(path, file, {
-      upsert: false, contentType: file.type || undefined
-    })
-    if (upErr) { console.error('[upload] storage:', upErr.message); continue }
+      const { data } = supa.storage.from('property-media').getPublicUrl(path)
+      items.push({ kind: 'image', url: data.publicUrl, position: i })
+    }
 
-    const { data } = supa.storage.from(bucket).getPublicUrl(path)
-    if (!data?.publicUrl) { console.error('[upload] no publicUrl'); continue }
-    uploaded.push({ kind: 'image', url: data.publicUrl, position: i })
+    if (items.length) {
+      await $fetch('/api/property-media', {
+        method: 'POST',
+        body: { property_id: propertyId, items }
+      })
+      navigateTo(`/spaces/${propertyId}`)
+    } else {
+      uploadErr.value = 'Nothing uploaded.'
+    }
+  } catch (e: any) {
+    uploadErr.value = e?.data?.message || e?.message || 'Upload failed'
+  } finally {
+    uploading.value = false
   }
-
-  if (uploaded.length) {
-    try {
-      await $fetch('/api/property-media', { method: 'POST', body: { property_id: propertyId, items: uploaded } })
-    } catch (e) { console.error('[upload] persist error:', e) }
-  }
-
-  navigateTo(`/spaces/${propertyId}`)
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Step 1: create draft property -->
-    <BaseListingForm :kind="props.kind" @created="onCreated" />
+    <FormsBaseListingForm :kind="props.kind" @created="onCreated" />
 
-    <!-- Step 2: upload media for that property -->
-    <div v-if="createdId" class="mt-2 border-t pt-6 space-y-3">
-      <h3 class="font-medium">Upload Media</h3>
-
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        @change="e => (pendingFiles = Array.from((e.target as HTMLInputElement).files || []))"
-        class="block"
-      />
-      <div class="text-xs text-gray-600">Selected: {{ pendingFiles.length }} file(s)</div>
-
-      <button class="bg-black text-white rounded px-4 py-2" @click="uploadMedia">
-        Upload & Continue
-      </button>
+    <div v-if="created" class="border rounded p-4">
+      <div class="font-medium mb-2">Upload media for: {{ created.title }}</div>
+      <input type="file" accept="image/*" multiple @change="(e:any)=>files = e.target.files" />
+      <div class="mt-3 flex items-center gap-2">
+        <button @click="upload" :disabled="uploading" class="px-4 py-2 rounded bg-black text-white">
+          {{ uploading ? 'Uploading…' : 'Upload & Publish' }}
+        </button>
+        <span v-if="uploadErr" class="text-red-600">{{ uploadErr }}</span>
+      </div>
     </div>
+
+    <div v-else class="text-gray-600">Create a draft to enable media upload.</div>
   </div>
 </template>

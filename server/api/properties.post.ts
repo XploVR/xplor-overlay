@@ -2,25 +2,44 @@
 import { serverSupabase } from '~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const devOwner = process.env.DEV_OWNER_UUID // optional dev owner to make “My Listings” work
+  const supabase = serverSupabase()
+  const body = await readBody<{
+    kind?: 'real_estate' | 'yacht' | 'gallery' | string
+    title: string
+    description: string
+    address_line1: string
+    city: string
+    country: string
+    lat?: number | null
+    lng?: number | null
+  }>(event)
+
+  // Basic validation to avoid DB NOT NULL errors
+  const required = ['title', 'description', 'address_line1', 'city', 'country'] as const
+  for (const k of required) {
+    if (!(body as any)?.[k] || String((body as any)[k]).trim() === '') {
+      throw createError({ statusCode: 400, statusMessage: `Missing field: ${k}` })
+    }
+  }
 
   const payload = {
-    kind: body.kind ?? 'real_estate',
-    title: String(body.title || '').trim(),
-    description: body.description ?? '',
-    address_line1: body.address_line1 ?? '',
-    city: body.city ?? '',
-    country: body.country ?? '',
-    lat: Number(body.lat ?? 0),
-    lng: Number(body.lng ?? 0),
-    status: body.status ?? 'draft',
-    ...(devOwner ? { owner_user_id: devOwner } : {}) // dev-only convenience
+    kind: body.kind || 'real_estate',
+    title: body.title,
+    description: body.description,
+    address_line1: body.address_line1,
+    city: body.city,
+    country: body.country,
+    lat: body.lat ?? null,
+    lng: body.lng ?? null,
+    status: 'draft' as const,
   }
-  if (!payload.title) throw createError({ statusCode: 400, statusMessage: 'Title required' })
 
-  const supabase = serverSupabase()
-  const { data, error } = await supabase.from('properties').insert(payload).select('*').single()
+  const { data, error } = await supabase
+    .from('properties')
+    .insert(payload)
+    .select('*')
+    .single()
+
   if (error) {
     console.error('[properties.post]', error)
     throw createError({ statusCode: 500, statusMessage: error.message })
