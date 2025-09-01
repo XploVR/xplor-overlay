@@ -1,18 +1,19 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
-  "files": [],
+  // Keep Nuxt's project refs
   "references": [
-    {
-      "path": "./.nuxt/tsconfig.app.json"
+    { "path": "./.nuxt/tsconfig.app.json" },
+    { "path": "./.nuxt/tsconfig.server.json" },
+    { "path": "./.nuxt/tsconfig.shared.json" },
+    { "path": "./.nuxt/tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"]
     },
-    {
-      "path": "./.nuxt/tsconfig.server.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.shared.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.node.json"
-    }
-  ]
+    "types": ["node", "vite/client"],
+    "skipLibCheck": true,
+    "strict": true
+  }
 }

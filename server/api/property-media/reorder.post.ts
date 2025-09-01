@@ -1,5 +1,5 @@
 // server/api/property-media/reorder.post.ts
-import { serverSupabase } from '~/server/utils/supabase'
+import { serverSupabase } from '~~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
   const supabase = serverSupabase()

@@ -1,82 +1,39 @@
-import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
-import mapboxgl from 'mapbox-gl'
+// plugins/mapbox.client.ts
+export default defineNuxtPlugin(async () => {
+  const token = useRuntimeConfig().public.mapboxToken as string | undefined
 
-type Item = { id:string; title?:string; lat?:number; lng?:number }
+  const [{ default: MapboxGL }, { default: MapLibreGL }] = await Promise.all([
+    import('mapbox-gl'),
+    import('maplibre-gl'),
+  ])
+  await Promise.all([
+    import('mapbox-gl/dist/mapbox-gl.css'),
+    import('maplibre-gl/dist/maplibre-gl.css'),
+  ])
 
-const props = defineProps<{
-  items: Item[]
-  center?: [number, number]   // [lng, lat]
-  zoom?: number
-}>()
+  if (token) (MapboxGL as any).accessToken = token
 
-const cfg = useRuntimeConfig().public
-const hasToken = computed(() => !!cfg.mapboxToken)
+  const MAPBOX_STYLE   = 'mapbox://styles/mapbox/streets-v12'
+  const MAPLIBRE_STYLE = 'https://demotiles.maplibre.org/style.json'
 
-const mapContainer = ref<HTMLDivElement | null>(null)
-let map: mapboxgl.Map | null = null
-let markers: mapboxgl.Marker[] = []
-
-function clearMarkers() { for (const m of markers) m.remove(); markers = [] }
-
-function addMarkers(items: Item[]) {
-  clearMarkers()
-  const valid = (items || []).filter(i => typeof i.lat === 'number' && typeof i.lng === 'number')
-  for (const it of valid) {
-    const el = document.createElement('div')
-    el.style.cssText = 'width:12px;height:12px;border-radius:9999px;background:#111'
-    const marker = new mapboxgl.Marker({ element: el })
-      .setLngLat([it.lng!, it.lat!])
-      .setPopup(new mapboxgl.Popup({ offset: 12 }).setHTML(
-        `<div style="font:12px/1.2 sans-serif">
-           <a href="/spaces/${it.id}" style="text-decoration:underline">
-             ${(it.title || 'View').replace(/</g,'&lt;')}
-           </a>
-         </div>`
-      ))
-      .addTo(map!)
-    markers.push(marker)
-  }
-}
-
-onMounted(() => {
-  if (!hasToken.value) {
-    console.warn('[Map] Missing mapboxToken')
-    return
-  }
-  if (!mapboxgl.supported()) {
-    console.warn('[Map] mapboxgl.supported() is false (WebGL unavailable)')
-    return
-  }
-  if (!mapContainer.value) {
-    console.warn('[Map] container is null')
-    return
+  function createMap(opts: { container: string | HTMLElement; center?: [number, number]; zoom?: number; style?: string }) {
+    const { container, center = [0, 0], zoom = 2 } = opts
+    if (token) {
+      try {
+        return new (MapboxGL as any).Map({ container, style: opts.style || MAPBOX_STYLE, center, zoom, attributionControl: true })
+      } catch (e) {
+        console.warn('[Map] Mapbox failed, falling back to MapLibre:', e)
+      }
+    }
+    return new (MapLibreGL as any).Map({ container, style: opts.style || MAPLIBRE_STYLE, center, zoom, attributionControl: true })
   }
 
-  // Set token (plugin can also set it; this is safe)
-  mapboxgl.accessToken = cfg.mapboxToken as string
-
-  map = new mapboxgl.Map({
-    container: mapContainer.value,
-    style: 'mapbox://styles/mapbox/streets-v12',
-    center: props.center || [2.6502, 39.5696],
-    zoom: props.zoom ?? 9
-  })
-
-  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
-
-  map.on('load', () => {
-    console.log('[Map] loaded')
-    addMarkers(props.items || [])
-  })
-
-  map.on('error', (e) => {
-    console.error('[Map] error event:', e?.error || e)
-  })
-})
-
-watch(() => props.items, (val) => { if (map) addMarkers(val || []) }, { deep: true })
-
-onBeforeUnmount(() => {
-  clearMarkers()
-  if (map) { map.remove(); map = null }
+  return {
+    provide: {
+      createMap,
+      mapbox: token ? MapboxGL : MapLibreGL, // unified API (Marker/Popup etc.)
+      maplibre: MapLibreGL,
+      map: token ? MapboxGL : MapLibreGL,
+    },
+  }
 })

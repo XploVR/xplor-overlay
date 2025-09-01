@@ -1,27 +1,30 @@
 ﻿<script setup lang="ts">
-type ListItem = {
-  id: string
-  title: string
-  city?: string
-  country?: string
-  thumbnail_url?: string | null
-  lat?: number
-  lng?: number
-}
+import { applyFilters, buildFacets, makeDefaultFilters, type Filters } from '~/server/utils/filtering'
+type ApiResp<T> = { data?: T; count?: number; error?: any } | T
+const { data: raw } = await useAsyncData('spaces-properties', () => $fetch<ApiResp<any[]>>('/api/properties'))
 
-const { data: items, pending, error } = await useFetch<ListItem[]>('/api/properties', {
-  default: () => [],
-  server: true,
-  onResponseError() { return [] }
+const items = computed<any[]>(() => {
+  const r = raw.value
+  if (Array.isArray(r)) return r
+  if (r && typeof r === 'object' && Array.isArray((r as any).data)) return (r as any).data
+  return []
 })
+
+const filters = ref<Filters>(makeDefaultFilters())
+const facets = computed(() => buildFacets(items.value))
+const filtered = computed(() => applyFilters(items.value, filters.value))
+function resetFilters() { filters.value = makeDefaultFilters() }
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <h1 class="text-2xl font-semibold">Explore Spaces</h1>
-    <div v-if="pending">Loading…</div>
-    <div v-else-if="error" class="text-red-600">Failed to load.</div>
-    <ListingGrid v-else :items="items || []" />
-    <ListingMap :items="items || []" :center="[2.6502,39.5696]" :zoom="9" />
+  <div class="container-x py-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold">Spaces</h1>
+      <NuxtLink to="/upload" class="btn btn-alt">+ Upload</NuxtLink>
+    </div>
+
+    <FiltersBar v-model="filters" :cities="facets.cities" :statuses="facets.statuses" @reset="resetFilters" />
+
+    <ListingGrid :items="filtered" />
   </div>
 </template>

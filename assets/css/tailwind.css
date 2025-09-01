@@ -1,3 +1,69 @@
 ﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------- Fonts ---------- */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Typografix";
+  src: url("/fonts/Typografix.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html, body, #__nuxt { height: 100%; }
+  html { @apply text-x-black bg-x-white; }
+  body { @apply font-sans antialiased; }
+  a { @apply text-inherit; }
+}
+
+/* ---------- Reusable UI tokens ---------- */
+@layer components {
+  .container-x { @apply max-w-6xl mx-auto px-4; }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-transparent
+           px-4 py-2 text-sm font-medium transition;
+  }
+  .btn-primary {
+    @apply bg-x-black text-x-white;
+  }
+  .btn-primary:hover { background: #0d0d0d; }
+  .btn-ghost {
+    @apply border border-x-gray/40 text-x-deep hover:bg-x-yellow/40;
+  }
+  .btn-alt {
+    @apply bg-x-yellow text-x-black;
+  }
+  .btn-alt:hover { filter: brightness(0.97); }
+
+  .card {
+    @apply rounded-xl border border-x-gray/40 bg-white shadow-soft;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium
+           bg-x-yellow/60 text-x-deep;
+  }
+
+  .nav-link {
+    @apply px-2 py-1 rounded-md text-sm text-x-deep/90 hover:text-x-black hover:bg-x-yellow/50 transition;
+  }
+  .nav-link-active {
+    @apply text-x-black bg-x-yellow/70;
+  }
+
+  .brand-xplor { @apply font-display; }
+}
+
+/* ---------- Map container helper ---------- */
+.map-block { @apply h-[420px] w-full rounded-xl overflow-hidden bg-white; }

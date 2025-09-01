@@ -1,9 +1,22 @@
-// server/api/properties/[id].get.ts
-import { serverSupabase } from '~/server/utils/supabase'
+import { serverSupabaseClient } from '#supabase/server'
+
 export default defineEventHandler(async (event) => {
-  const { id } = getRouterParams(event)
-  const supabase = serverSupabase()
-  const { data, error } = await supabase.from('properties').select('*').eq('id', id).single()
-  if (error) throw createError({ statusCode: 404, statusMessage: error.message })
+  const client = await serverSupabaseClient(event)
+  const id = getRouterParam(event, 'id')
+
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: 'Missing property id' })
+  }
+
+  const { data, error } = await client
+    .from('properties_with_thumb')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: error.message })
+  }
+
   return data
 })

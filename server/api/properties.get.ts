@@ -1,48 +1,25 @@
 // server/api/properties.get.ts
-import { serverSupabase } from '~/server/utils/supabase'
+export default defineEventHandler(async () => {
+  const storage = useStorage('data')
+  const keys = await storage.getKeys('listings').catch(() => [])
+  const stored = await Promise.all(keys.map(k => storage.getItem<any>(k)))
 
-export default defineEventHandler(async (event) => {
-  const supabase = serverSupabase()
-  const q = getQuery(event) as { status?: string; kind?: string; city?: string }
+  const mappedStored = stored.map((x) => ({
+    id: x.id,
+    title: x.details?.title,
+    city: x.details?.city,
+    price: x.details?.price,
+    status: x.details?.status || 'draft',
+    created_at: x.createdAt,
+    // coords: add when you capture them in details
+  }))
 
-  // Prefer view with thumbnail_url
-  let query = supabase
-    .from('properties_with_thumb')
-    .select('id,kind,title,description,city,country,status,created_at,lat,lng,thumbnail_url')
-    .order('created_at', { ascending: false })
-    .limit(200)
+  // keep or remove your seed data; combining here
+  const seed = [
+    { id: 1, title: 'Demo Villa', city: 'Palma',     status: 'published', price: 123456, created_at: '2025-08-01T10:00:00Z' },
+    { id: 2, title: 'Seafront Loft', city: 'Felanitx', status: 'draft',     price: 789000, created_at: '2025-08-20T09:00:00Z' },
+    // …
+  ]
 
-  if (q.status) query = query.eq('status', q.status)
-  if (q.kind)   query = query.eq('kind', q.kind)
-  if (q.city)   query = query.ilike('city', `%${q.city}%`)
-
-  const { data, error } = await query
-
-  if (error) {
-    // Fallback: embed media and compute first URL
-    const fb = await supabase
-      .from('properties')
-      .select(`
-        id, kind, title, description, city, country, status, created_at, lat, lng,
-        property_media ( url, position, created_at )
-      `)
-      .order('created_at', { ascending: false })
-      .limit(200)
-
-    if (fb.error) {
-      throw createError({ statusCode: 500, statusMessage: fb.error.message })
-    }
-
-    return (fb.data || []).map((p: any) => {
-      const media = Array.isArray(p.property_media) ? p.property_media : []
-      const first = media.find((m: any) => m.position === 0) || media[0] || null
-      return {
-        id: p.id, kind: p.kind, title: p.title, description: p.description,
-        city: p.city, country: p.country, status: p.status, created_at: p.created_at,
-        lat: p.lat, lng: p.lng, thumbnail_url: first?.url || null,
-      }
-    })
-  }
-
-  return data ?? []
+  return [...mappedStored, ...seed]
 })

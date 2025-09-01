@@ -1,5 +1,5 @@
 // server/api/property-media.get.ts
-import { serverSupabase } from '~/server/utils/supabase'
+import { serverSupabase } from '~~/server/utils/supabase'
 export default defineEventHandler(async (event) => {
   const q = getQuery(event) as { property_id?: string }
   const supabase = serverSupabase()

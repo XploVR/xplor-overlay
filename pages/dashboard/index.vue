@@ -1,60 +1,43 @@
 ﻿<script setup lang="ts">
-type Row = { id:string; title:string; city?:string; country?:string; status?:string; created_at?:string; thumbnail_url?:string|null }
+import { applyFilters, buildFacets, makeDefaultFilters, type Filters } from '~/server/utils/filtering'
+type ApiResp<T> = { data?: T; count?: number; error?: any } | T
+const { data: raw } = await useAsyncData('dash-properties', () => $fetch<ApiResp<any[]>>('/api/properties'))
 
-const { $supabase } = useNuxtApp()
-const user = ref<any | null>(null)
-const items = ref<Row[]>([])
-const loading = ref(true)
-const err = ref<string | null>(null)
-
-onMounted(async () => {
-  const { data } = await $supabase.auth.getUser()
-  user.value = data.user || null
-  if (!user.value) { loading.value = false; return }
-
-  // Use the view so we get thumbnail_url
-  const { data: rows, error } = await $supabase
-    .from('properties_with_thumb')
-    .select('id,title,city,country,status,created_at,thumbnail_url')
-    .eq('owner_user_id', user.value.id)        // requires column in view; see SQL below
-    .order('created_at', { ascending: false })
-
-  if (error) err.value = error.message
-  items.value = rows || []
-  loading.value = false
+const items = computed<any[]>(() => {
+  const r = raw.value
+  if (Array.isArray(r)) return r
+  if (r && typeof r === 'object' && Array.isArray((r as any).data)) return (r as any).data
+  return []
 })
+
+const filters = ref<Filters>(makeDefaultFilters())
+const facets = computed(() => buildFacets(items.value))
+const filtered = computed(() => applyFilters(items.value, filters.value))
+
+const publishedCount = computed(() => filtered.value.filter((i: any) => i?.status === 'published').length)
+const draftCount = computed(() => filtered.value.filter((i: any) => i?.status === 'draft').length)
+const recent = computed(() => filtered.value.slice(0, 6))
+function resetFilters() { filters.value = makeDefaultFilters() }
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">My Listings</h1>
-      <NavAuth />
+  <div class="container-x py-8 space-y-6">
+    <h1 class="text-2xl font-semibold">Dashboard</h1>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="card p-4"><p class="text-sm text-x-gray2">Total</p><p class="text-2xl font-semibold">{{ filtered.length }}</p></div>
+      <div class="card p-4"><p class="text-sm text-x-gray2">Published</p><p class="text-2xl font-semibold">{{ publishedCount }}</p></div>
+      <div class="card p-4"><p class="text-sm text-x-gray2">Drafts</p><p class="text-2xl font-semibold">{{ draftCount }}</p></div>
+      <div class="card p-4"><p class="text-sm text-x-gray2">Avg Price</p><p class="text-2xl font-semibold">
+        {{ filtered.length ? Math.round(filtered.reduce((s: number, i: any) => s + (i?.price ?? 0), 0) / filtered.length).toLocaleString() : '—' }}
+      </p></div>
     </div>
 
-    <div v-if="loading">Loading…</div>
+    <FiltersBar v-model="filters" :cities="facets.cities" :statuses="facets.statuses" @reset="resetFilters" />
 
-    <div v-else-if="!user" class="p-4 border rounded bg-yellow-50">
-      Please <NuxtLink to="/auth" class="underline">sign in</NuxtLink> to see your listings.
-    </div>
-
-    <template v-else>
-      <div v-if="!items.length" class="p-4 border rounded text-gray-600">You have no listings yet.</div>
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <NuxtLink v-for="it in items" :key="it.id" :to="`/spaces/${it.id}`" class="block border rounded overflow-hidden hover:shadow">
-          <div class="aspect-[4/3] bg-gray-100">
-            <img v-if="it.thumbnail_url" :src="it.thumbnail_url" alt="" class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full flex items-center justify-center text-gray-500">No image</div>
-          </div>
-          <div class="p-3">
-            <div class="font-medium truncate">{{ it.title }}</div>
-            <div class="text-sm text-gray-600 truncate">
-              {{ it.city }}<span v-if="it.city && it.country"> · </span>{{ it.country }}
-            </div>
-            <div class="text-xs text-gray-500 mt-1 uppercase">{{ it.status }}</div>
-          </div>
-        </NuxtLink>
-      </div>
-    </template>
+    <section class="space-y-3">
+      <h2 class="text-lg font-medium">Recent</h2>
+      <ListingGrid :items="recent" />
+    </section>
   </div>
 </template>
