@@ -1,6 +1,6 @@
 // server/api/listings/[id].get.ts
 import { defineEventHandler, createError } from 'h3'
-import type { ListingRow } from '../index.get'
+import type { ListingRow } from './index.get'
 
 export default defineEventHandler(async (event) => {
   const { id } = event.context.params as { id: string }

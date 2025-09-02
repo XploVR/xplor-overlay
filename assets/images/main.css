@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Typografix';
+  src: url('/fonts/Typografix.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* xplor-inspired design system. Bold, modern, striking.
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Base colors using your new palette */
+    --background: 0 0% 100%; /* White FFFFFF */
+    --foreground: 0 0% 7%; /* Black 121212 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    /* Primary using Muted Yellow */
+    --primary: 67 80% 77%; /* Muted Yellow E8F793 */
+    --primary-foreground: 0 0% 7%;
+
+    /* Secondary using Gray */
+    --secondary: 235 11% 78%; /* Gray C1C2CE */
+    --secondary-foreground: 0 0% 7%;
+
+    /* Muted using Gray 2 */
+    --muted: 235 14% 63%; /* Gray 2 9899AC */
+    --muted-foreground: 0 0% 7%;
+
+    --accent: 235 11% 78%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 235 11% 78%;
+    --input: 235 11% 78%;
+    --ring: 67 80% 77%;
+
+    --radius: 0.5rem;
+
+    /* xplor brand colors using your new palette */
+    --xplor-yellow: 67 80% 77%; /* Muted Yellow E8F793 */
+    --xplor-yellow-light: 67 85% 85%; /* Lighter version of muted yellow */
+    --xplor-yellow-dark: 67 75% 65%; /* Darker version of muted yellow */
+    --xplor-black: 0 0% 7%; /* Black 121212 */
+    --xplor-grey: 235 14% 63%; /* Gray 2 9899AC */
+    --xplor-grey-light: 235 11% 78%; /* Gray C1C2CE */
+    --turquoise: 174 72% 56%; /* Turquoise #40E0D0 */
+    
+    /* Custom gradients and effects */
+    --gradient-hero: linear-gradient(135deg, hsl(200 9% 18%), hsl(67 80% 77% / 0.3));
+    --gradient-card: linear-gradient(145deg, hsl(67 80% 77% / 0.05), hsl(235 14% 63% / 0.05));
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 7% / 0.1), 0 1px 2px 0 hsl(0 0% 7% / 0.06);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 7% / 0.1), 0 2px 4px -1px hsl(0 0% 7% / 0.06);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Mobile-optimized spacing */
+    --spacing-mobile-xs: 0.25rem;
+    --spacing-mobile-sm: 0.5rem;
+    --spacing-mobile-md: 1rem;
+    --spacing-mobile-lg: 1.5rem;
+    --spacing-mobile-xl: 2rem;
+    --spacing-mobile-2xl: 3rem;
+
+    /* Touch target sizes */
+    --touch-target-min: 44px;
+    --touch-target-comfortable: 48px;
+
+    /* Mobile typography scale */
+    --text-mobile-xs: 0.75rem;
+    --text-mobile-sm: 0.875rem;
+    --text-mobile-base: 1rem;
+    --text-mobile-lg: 1.125rem;
+    --text-mobile-xl: 1.25rem;
+    --text-mobile-2xl: 1.5rem;
+    --text-mobile-3xl: 1.875rem;
+    --text-mobile-4xl: 2.25rem;
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 0 0% 7%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 235 11% 78%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 235 11% 78%;
+    --sidebar-ring: 67 80% 77%;
+  }
+
+  .dark {
+    /* Dark mode using Dark Deep as background */
+    --background: 200 9% 18%; /* Dark Deep 292D32 */
+    --foreground: 0 0% 100%; /* White FFFFFF */
+
+    --card: 200 9% 18%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 200 9% 18%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Primary still muted yellow in dark mode */
+    --primary: 67 80% 77%; /* Muted Yellow E8F793 */
+    --primary-foreground: 0 0% 7%; /* Black text on yellow */
+
+    /* Secondary using slightly lighter version of dark deep */
+    --secondary: 200 9% 25%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted using gray 2 */
+    --muted: 235 14% 63%; /* Gray 2 9899AC */
+    --muted-foreground: 0 0% 100%;
+
+    --accent: 200 9% 25%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 200 9% 25%;
+    --input: 200 9% 25%;
+    --ring: 67 80% 77%;
+    
+    /* xplor colors for dark mode */
+    --xplor-yellow: 67 80% 77%; /* Muted Yellow */
+    --xplor-yellow-light: 67 85% 85%;
+    --xplor-yellow-dark: 67 75% 65%;
+    --xplor-black: 0 0% 7%; /* Black 121212 */
+    --xplor-grey: 235 14% 63%; /* Gray 2 */
+    --xplor-grey-light: 235 11% 78%; /* Gray */
+    --turquoise: 174 72% 56%; /* Turquoise #40E0D0 */
+    
+    /* Dark mode adjustments */
+    --gradient-hero: linear-gradient(135deg, hsl(200 9% 18%), hsl(67 80% 77% / 0.6));
+    --gradient-card: linear-gradient(145deg, hsl(67 80% 77% / 0.08), hsl(235 14% 63% / 0.1));
+    
+    /* Sidebar dark mode */
+    --sidebar-background: 200 9% 18%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 67 80% 77%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 200 9% 25%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 200 9% 25%;
+    --sidebar-ring: 67 80% 77%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body, #app { 
+    height: 100%; 
+    width: 100%; 
+    margin: 0; 
+    padding: 0; 
+  }
+  
+  /* Removed overflow-x: hidden to allow sidebar expansion */
+  /* body { overflow-x: hidden; } */
+  
+  *, *::before, *::after { 
+    box-sizing: border-box; 
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

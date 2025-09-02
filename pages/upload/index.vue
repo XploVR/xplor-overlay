@@ -3,6 +3,7 @@
 import { ref, reactive, watch, watchEffect, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { z } from 'zod'
 import { useRuntimeConfig } from '#app'
+import { useHead } from '#imports'
 import type { ListingDraft } from '~/types/media'
 import { useAutosave } from '~/composables/useAutosave'
 import { useUploader } from '~/composables/useUploader'
@@ -49,6 +50,11 @@ const route = useRoute()
 const router = useRouter()
 const showTypePicker = ref(true)
 
+// quick lookup map for labels
+const typeLabelByKey = computed<Record<string, string>>(() =>
+  Object.fromEntries(typeOptions.map(o => [o.key, o.label]))
+)
+
 /* ------------------------------------
    Draft state + autosave
 ------------------------------------ */
@@ -66,7 +72,7 @@ const draft = reactive<ListingDraft>({
     country: '',
     lat: null as number | null,
     lng: null as number | null,
-    // new: listing kind
+    // listing kind
     kind: undefined as any, // 'real_estate' | 'developments' | ...
   },
   media: {
@@ -85,7 +91,7 @@ const { state: savedDraft, savedAt, saveNow } =
   useAutosave<ListingDraft>(`xplor_draft_${draftId}`, draft)
 watchEffect(() => Object.assign(draft, savedDraft.value))
 
-// Initialize picker visibility
+// Initialize picker visibility from ?type=
 onMounted(() => {
   const qType = (route.query.type as string | undefined) || undefined
   if (qType && typeOptions.some(t => t.key === qType)) {
@@ -106,6 +112,15 @@ function selectType(kind: string) {
 function changeType() {
   showTypePicker.value = true
 }
+
+// Dynamic heading + document title
+const selectedLabel = computed(() =>
+  draft.details.kind ? (typeLabelByKey.value[draft.details.kind as string] ?? null) : null
+)
+const heading = computed(() => selectedLabel.value ? `${selectedLabel.value} Upload` : 'Upload a Space')
+
+// keep <title> in sync
+useHead(() => ({ title: heading.value }))
 
 /* ------------------------------------
    Uploader (files + URLs) + limits
@@ -559,9 +574,12 @@ async function publish() {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-semibold">Upload a Space</h1>
-        <span v-if="!showTypePicker && draft.details.kind" class="text-xs px-2 py-1 rounded bg-gray-100">
-          {{ typeOptions.find(t => t.key === draft.details.kind)?.label || draft.details.kind }}
+        <h1 class="text-2xl font-semibold">{{ heading }}</h1>
+        <span
+          v-if="!showTypePicker && draft.details.kind"
+          class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-900"
+        >
+          {{ typeLabelByKey[draft.details.kind] || draft.details.kind }}
         </span>
         <button
           v-if="!showTypePicker"
@@ -586,7 +604,7 @@ async function publish() {
           class="group rounded-2xl aspect-square border bg-white hover:shadow-md hover:bg-gray-50 transition flex flex-col items-center justify-center gap-3"
           @click="selectType(opt.key)"
         >
-          <!-- Inline, clean outline icons -->
+          <!-- Inline outline icons -->
           <svg v-if="opt.icon==='home'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 10.5 12 3l9 7.5" />
             <path d="M5 10v9a2 2 0 0 0 2 2h3v-6h4v6h3a2 2 0 0 0 2-2v-9" />
@@ -953,3 +971,4 @@ async function publish() {
     </template>
   </div>
 </template>
+

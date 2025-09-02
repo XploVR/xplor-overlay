@@ -1,22 +1,13 @@
 <!-- components/nav/AppSidebar.vue -->
 <script setup lang="ts">
-import { h } from 'vue'
+import { h, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useSidebar } from '~/composables/useSidebar'
 
 const { isOpen, isCollapsed, toggleCollapsed, closeMobile } = useSidebar()
+const route = useRoute()
 
-const cats = [
-  { key: 'real_estate',  label: 'Real Estate',        to: '/upload?type=real_estate' },
-  { key: 'developments', label: 'Developments',       to: '/upload?type=developments' },
-  { key: 'yachts',       label: 'Yachts',             to: '/upload?type=yachts' },
-  { key: 'hospitality',  label: 'Hospitality',        to: '/upload?type=hospitality' },
-  { key: 'galleries',    label: 'Galleries',          to: '/upload?type=galleries' },
-  { key: 'automotive',   label: 'Automotive',         to: '/upload?type=automotive' },
-  { key: 'aviation',     label: 'Aviation',           to: '/upload?type=aviation' },
-  { key: 'sports',       label: 'Sports Facilities',  to: '/upload?type=sports' },
-  { key: 'retail',       label: 'Retail',             to: '/upload?type=retail' },
-]
-
+/** PAGES (top group) */
 const pages = [
   { key: 'dashboard', label: 'Dashboard', to: '/dashboard' },
   { key: 'about',     label: 'About',     to: '/about' },
@@ -24,7 +15,23 @@ const pages = [
   { key: 'faqs',      label: 'FAQs',      to: '/faqs' },
   { key: 'pros',      label: 'Tour Pros', to: '/tour-pros' },
   { key: 'gear',      label: 'Equipment', to: '/equipment' },
-]
+] as const
+
+/** CATEGORIES (bottom group) → link to About pages */
+const cats = [
+  { key: 'real_estate',  label: 'Real Estate',        to: '/about/real-estate' },
+  { key: 'developments', label: 'Developments',       to: '/about/developments' },
+  { key: 'yachts',       label: 'Yachts',             to: '/about/yachts' },
+  { key: 'hospitality',  label: 'Hospitality',        to: '/about/hospitality' },
+  { key: 'galleries',    label: 'Galleries',          to: '/about/galleries' },
+  { key: 'automotive',   label: 'Automotive',         to: '/about/automotive' },
+  { key: 'aviation',     label: 'Aviation',           to: '/about/aviation' },
+  { key: 'sports',       label: 'Sports Facilities',  to: '/about/sports-facilities' },
+  { key: 'retail',       label: 'Retail',             to: '/about/retail' },
+] as const
+
+/** Active route helper (prefix match so nested routes still highlight) */
+const isActive = (to: string) => computed(() => route.path === to || route.path.startsWith(to + '/'))
 
 function Icon (name: string, cls = 'w-5 h-5') {
   const base = { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': 1.6, class: cls }
@@ -52,7 +59,7 @@ function Icon (name: string, cls = 'w-5 h-5') {
 <template>
   <!-- Desktop sticky sidebar -->
   <aside
-    class="hidden md:flex shrink-0 transition-all duration-200 ease-out sticky top-0 self-stretch"
+    class="hidden md:flex shrink-0 transition-all duration-200 ease-out sticky self-start top-14"
     :class="isCollapsed ? 'w-[76px]' : 'w-[280px]'"
   >
     <div class="relative w-full rounded-2xl border border-white/10 bg-white/[0.03] p-2 flex flex-col">
@@ -77,27 +84,10 @@ function Icon (name: string, cls = 'w-5 h-5') {
         </button>
       </div>
 
-      <!-- Scrollable nav -->
-      <div class="mt-2 flex-1 overflow-y-auto thin-scroll">
+      <!-- Scrollable nav (internal scroller capped to viewport minus header) -->
+      <div class="mt-2 flex-1 overflow-y-auto thin-scroll max-h-[calc(100dvh-3.5rem-1rem)]">
+        <!-- GROUP: Pages (TOP) -->
         <div v-if="!isCollapsed" class="px-2 pt-1 pb-2">
-          <p class="text-xs uppercase tracking-wide text-white/50">Categories</p>
-        </div>
-        <nav class="flex flex-col gap-1">
-          <NuxtLink
-            v-for="c in cats"
-            :key="c.key"
-            :to="c.to"
-            class="group flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.08]"
-            :title="isCollapsed ? c.label : undefined"
-          >
-            <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
-              <component :is="Icon(c.key, 'w-5 h-5')" />
-            </span>
-            <span v-if="!isCollapsed" class="truncate">{{ c.label }}</span>
-          </NuxtLink>
-        </nav>
-
-        <div v-if="!isCollapsed" class="px-2 pt-4 pb-2">
           <p class="text-xs uppercase tracking-wide text-white/50">Pages</p>
         </div>
         <nav class="flex flex-col gap-1">
@@ -107,11 +97,32 @@ function Icon (name: string, cls = 'w-5 h-5') {
             :to="p.to"
             class="group flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.08]"
             :title="isCollapsed ? p.label : undefined"
+            :class="isActive(p.to) ? 'bg-white/[0.10] border border-white/15 text-white' : 'border border-transparent text-white/80'"
           >
             <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
               <component :is="Icon(p.key, 'w-5 h-5')" />
             </span>
             <span v-if="!isCollapsed" class="truncate">{{ p.label }}</span>
+          </NuxtLink>
+        </nav>
+
+        <!-- GROUP: Categories (BOTTOM) -->
+        <div v-if="!isCollapsed" class="px-2 pt-4 pb-2">
+          <p class="text-xs uppercase tracking-wide text-white/50">Categories</p>
+        </div>
+        <nav class="flex flex-col gap-1">
+          <NuxtLink
+            v-for="c in cats"
+            :key="c.key"
+            :to="c.to"
+            class="group flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.08]"
+            :title="isCollapsed ? c.label : undefined"
+            :class="isActive(c.to) ? 'bg-white/[0.10] border border-white/15 text-white' : 'border border-transparent text-white/80'"
+          >
+            <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
+              <component :is="Icon(c.key, 'w-5 h-5')" />
+            </span>
+            <span v-if="!isCollapsed" class="truncate">{{ c.label }}</span>
           </NuxtLink>
         </nav>
       </div>
@@ -133,18 +144,32 @@ function Icon (name: string, cls = 'w-5 h-5') {
           <button class="px-2 py-1 rounded-lg border border-white/15 text-white/80" @click="closeMobile">Close</button>
         </div>
 
+        <!-- Mobile: Pages first, then Categories -->
         <nav class="mt-3 grid grid-cols-2 gap-2">
-          <NuxtLink v-for="c in cats" :key="c.key" :to="c.to" class="group flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/[0.08]" @click="closeMobile">
-            <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
-              <component :is="Icon(c.key, 'w-5 h-5')" />
-            </span>
-            <span class="truncate">{{ c.label }}</span>
-          </NuxtLink>
-          <NuxtLink v-for="p in pages" :key="p.key" :to="p.to" class="group flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/[0.08]" @click="closeMobile">
+          <NuxtLink
+            v-for="p in pages"
+            :key="p.key"
+            :to="p.to"
+            class="group flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/[0.08]"
+            @click="closeMobile"
+          >
             <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
               <component :is="Icon(p.key, 'w-5 h-5')" />
             </span>
             <span class="truncate">{{ p.label }}</span>
+          </NuxtLink>
+
+          <NuxtLink
+            v-for="c in cats"
+            :key="c.key"
+            :to="c.to"
+            class="group flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/[0.08]"
+            @click="closeMobile"
+          >
+            <span class="inline-grid place-items-center rounded-lg border border-white/10 bg-white/[0.03] p-2 text-white/80">
+              <component :is="Icon(c.key, 'w-5 h-5')" />
+            </span>
+            <span class="truncate">{{ c.label }}</span>
           </NuxtLink>
         </nav>
       </div>

@@ -1,4 +1,3 @@
-ï»¿<!-- pages/dashboard/index.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
@@ -17,46 +16,54 @@ type Listing = {
   updatedAt: string
 }
 
-const { data: listingsData, refresh: refreshListings } = await useAsyncData<Listing[]>(
-  'listings',
-  () => $fetch('/api/listings')
-)
-const listings = ref<Listing[]>(listingsData.value || [])
+type AccessRequest = {
+  id: string
+  listingId: string
+  email: string
+  note?: string
+  status: 'pending'|'approved'|'rejected'
+  createdAt: string
+}
 
-// Access Requests
-type AccessRequest = { id: string; listingId: string; email: string; note?: string; status: 'pending'|'approved'|'rejected'; createdAt: string }
-const { data: reqData, refresh: refreshReqs } = await useAsyncData<AccessRequest[]>(
-  'access-requests',
-  () => $fetch('/api/access-requests')
-)
-const accessRequests = ref<AccessRequest[]>(reqData.value || [])
-
-// News
 type NewsItem = { id: string; title: string; source: string; time: string; url?: string }
-const { data: newsData } = await useAsyncData<NewsItem[]>('news', () => $fetch('/api/news'))
-const news = ref(newsData.value || [])
 
-// Area trends
-const userCity = ref('Marbella')
+const {
+  data: listingsData,
+  pending: listingsPending,
+  error: listingsError,
+  refresh: refreshListings
+} = await useAsyncData<Listing[]>('listings', () => $fetch('/api/listings'))
+
+const listings = computed(() => listingsData.value ?? [])
+
+const {
+  data: reqData,
+  pending: reqPending,
+  error: reqError,
+} = await useAsyncData<AccessRequest[]>('access-requests', () => $fetch('/api/access-requests'))
+const accessRequests = computed(() => reqData.value ?? [])
+
+const {
+  data: newsData,
+  pending: newsPending,
+  error: newsError,
+} = await useAsyncData<NewsItem[]>('news', () => $fetch('/api/news'))
+const news = computed(() => newsData.value ?? [])
+
 const area = ref('Marbella, ES')
-const { data: areaData, refresh: refreshArea } = await useAsyncData<{ area: string; kpis: { name: string; value: string; delta: string }[] }>(
-  () => `area:${area.value}`,
+const {
+  data: areaData,
+  pending: areaPending,
+  error: areaError,
+} = await useAsyncData<{ area: string; kpis: { name: string; value: string; delta: string }[] }>(
+  'area-trends',
   () => $fetch('/api/trends/area', { query: { area: area.value } }),
   { watch: [area] }
 )
-const areaKpis = computed(() => areaData.value?.kpis || [])
+const areaKpis = computed(() => areaData.value?.kpis ?? [])
 
-// Toasts
-const toasts = ref<{ id: string; msg: string; kind: 'ok'|'warn' }[]>([])
-function toast(msg: string, kind: 'ok' | 'warn' = 'ok') {
-  toasts.value.push({ id: `${Date.now()}`, msg, kind })
-  setTimeout(() => { toasts.value.shift() }, 2200)
-}
-
-// Privacy + PIN
+// Privacy controls
 const savingId = ref<string | null>(null)
-function randomPin(n = 6) { return Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('') }
-
 async function savePrivacy(l: Listing) {
   savingId.value = l.id
   try {
@@ -65,9 +72,6 @@ async function savePrivacy(l: Listing) {
       body: { privacy: l.privacy, pinCode: l.pinCode ?? null }
     })
     await refreshListings()
-    toast('Privacy updated')
-  } catch {
-    toast('Failed to save', 'warn')
   } finally {
     savingId.value = null
   }
@@ -79,21 +83,16 @@ function setPrivacy(l: Listing, p: Privacy) {
 }
 function generatePin(l: Listing) {
   l.privacy = 'pin'
-  l.pinCode = randomPin(6)
+  l.pinCode = Array.from({ length: 6 }, () => Math.floor(Math.random()*10)).join('')
   savePrivacy(l)
 }
 async function copyInvite(l: Listing) {
   const url = `${location.origin}/spaces/${l.id}?pin=${encodeURIComponent(l.pinCode || '')}`
-  try { await navigator.clipboard.writeText(url); toast('Invite link copied') }
-  catch { toast('Could not copy', 'warn') }
+  try { await navigator.clipboard.writeText(url) } catch {}
 }
 
-// Approve/reject (client-side status for now)
-function approveReq(r: AccessRequest) { r.status = 'approved'; toast('Request approved') }
-function rejectReq(r: AccessRequest) { r.status = 'rejected'; toast('Request rejected', 'warn') }
-
-// Recently viewed: read from localStorage
-type Viewed = { id: string; title?: string; at: string }
+// Recently viewed (from middleware/localStorage)
+type Viewed = { id: string; at: string; title?: string }
 const recentlyViewed = ref<Viewed[]>([])
 onMounted(() => {
   try {
@@ -106,260 +105,165 @@ onMounted(() => {
 function pctColor(n: number) { return n > 0 ? 'text-emerald-400' : (n < 0 ? 'text-red-400' : 'text-white/70') }
 function fmt(n: number) { return Intl.NumberFormat(undefined, { notation: 'compact' }).format(n) }
 
-const hotGlobal = computed(() => [...listings.value].sort((a,b)=> b.views30d - a.views30d).slice(0,4))
+// Hot lists (with safe fallbacks)
+const hotGlobal = computed(() =>
+  [...listings.value].sort((a,b)=> b.views30d - a.views30d).slice(0,4)
+)
 const hotLocal = computed(() => {
-  const local = listings.value.filter(l => (l.city || '').toLowerCase() === userCity.value.toLowerCase())
-  return (local.length ? local : listings.value).sort((a,b)=> b.hits30d - a.hits30d).slice(0,4)
+  const mine = listings.value.filter(l => (l.city || '').toLowerCase() === 'marbella')
+  return (mine.length ? mine : listings.value).slice(0,4)
 })
+
+// ApexCharts (dark, sparkline)
+const sparkOpts = {
+  chart: { type: 'area', height: 80, sparkline: { enabled: true }, toolbar: { show: false }, animations: { enabled: true } },
+  stroke: { width: 2, curve: 'smooth' },
+  fill: { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.05 } },
+  dataLabels: { enabled: false },
+  tooltip: { enabled: false },
+  grid: { show: false },
+  theme: { mode: 'dark' },
+  colors: undefined // let Apex pick (we're in dark theme)
+}
+function seriesFrom(arr: number[]) {
+  const data = Array.isArray(arr) && arr.length ? arr : [0,0,0,0,0,0,0]
+  return [{ name: 'trend', data }]
+}
 </script>
 
-
 <template>
-  <div class="container-x py-6 space-y-6">
-    <!-- Toasts -->
-    <div class="fixed z-50 top-16 right-4 space-y-2">
-      <div
-        v-for="t in toasts" :key="t.id"
-        class="px-3 py-2 rounded-lg border text-sm"
-        :class="t.kind === 'ok' ? 'bg-white/10 border-white/15' : 'bg-red-500/20 border-red-500/40'"
+  <div class="container-x py-6 text-white">
+    <div class="flex items-center gap-3 mb-4">
+      <h1 class="text-2xl md:text-3xl font-semibold">Dashboard</h1>
+      <span
+        class="text-xs px-2 py-1 rounded-lg border border-white/10 bg-white/5"
+        :class="{
+          'text-amber-300': listingsPending || reqPending || newsPending || areaPending,
+          'text-red-300': listingsError || reqError || newsError || areaError,
+          'text-emerald-300': !(listingsPending || reqPending || newsPending || areaPending) && !(listingsError || reqError || newsError || areaError)
+        }"
       >
-        {{ t.msg }}
+        {{ listingsError || reqError || newsError || areaError ? 'API error' : (listingsPending || reqPending || newsPending || areaPending ? 'Loading…' : 'Live') }}
+      </span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <div class="text-xs text-white/60">Listings</div>
+        <div class="text-2xl font-semibold mt-1">{{ listings.length }}</div>
+        <div class="mt-2 text-xs text-white/50">Total active</div>
+      </div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <div class="text-xs text-white/60">Views (30d)</div>
+        <div class="text-2xl font-semibold mt-1">
+          {{ fmt(listings.reduce((a, b) => a + (b.views30d || 0), 0)) }}
+        </div>
+        <div class="mt-2 text-xs text-white/50">Aggregate</div>
+      </div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <div class="text-xs text-white/60">Hits (30d)</div>
+        <div class="text-2xl font-semibold mt-1">
+          {{ fmt(listings.reduce((a, b) => a + (b.hits30d || 0), 0)) }}
+        </div>
+        <div class="mt-2 text-xs text-white/50">Aggregate</div>
+      </div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <div class="text-xs text-white/60">Area</div>
+        <div class="text-lg font-medium mt-1">{{ area }}</div>
+        <div class="mt-2 text-xs text-white/50">Change area in code or UI</div>
       </div>
     </div>
 
-    <!-- Header -->
-    <div class="flex items-end justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-semibold">Dashboard</h1>
-        <p class="text-white/60 text-sm">Overview of performance, trends, and controls</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <NuxtLink to="/upload" class="btn btn-primary">+ New Listing</NuxtLink>
-        <NuxtLink to="/spaces" class="btn btn-ghost">View All</NuxtLink>
+    <!-- Hot Global w/ sparklines -->
+    <h2 class="text-xl font-semibold mt-8 mb-3">Hot (Global)</h2>
+    <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-4">
+      <div
+        v-for="l in (hotGlobal.length ? hotGlobal : [{id:'-',title:'No data',city:'',country:'', views30d:0,hits30d:0,trend:0,spark:[],privacy:'public',updatedAt:''}])"
+        :key="l.id"
+        class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
+      >
+        <div class="flex items-center justify-between">
+          <div class="font-medium truncate">{{ l.title }}</div>
+          <div class="text-xs" :class="pctColor(l.trend)">{{ l.trend > 0 ? '+' : ''}}{{ l.trend }}%</div>
+        </div>
+        <div class="text-xs text-white/60 mt-1 truncate">{{ l.city }} {{ l.country }}</div>
+        <div class="mt-3">
+          <ClientOnly>
+            <apexchart type="area" height="80" :options="sparkOpts" :series="seriesFrom(l.spark)" />
+          </ClientOnly>
+        </div>
+        <div class="mt-2 text-xs text-white/60 flex items-center gap-3">
+          <span>Views: <span class="text-white">{{ fmt(l.views30d || 0) }}</span></span>
+          <span>Hits: <span class="text-white">{{ fmt(l.hits30d || 0) }}</span></span>
+        </div>
       </div>
     </div>
 
-    <!-- Top KPIs -->
-    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card p-4">
-        <p class="text-xs text-white/60">Total Views (30d)</p>
-        <p class="text-2xl font-semibold mt-1">{{ fmt(listings.reduce((s,l)=>s+l.views30d,0)) }}</p>
-      </div>
-      <div class="card p-4">
-        <p class="text-xs text-white/60">Total Hits (30d)</p>
-        <p class="text-2xl font-semibold mt-1">{{ fmt(listings.reduce((s,l)=>s+l.hits30d,0)) }}</p>
-      </div>
-      <div class="card p-4">
-        <p class="text-xs text-white/60">Active Listings</p>
-        <p class="text-2xl font-semibold mt-1">{{ listings.length }}</p>
-      </div>
-      <div class="card p-4">
-        <p class="text-xs text-white/60">Avg Trend</p>
-        <p class="text-2xl font-semibold mt-1" :class="pctColor(Math.round(listings.reduce((s,l)=>s+l.trend,0)/Math.max(1,listings.length)))">
-          {{ Math.round(listings.reduce((s,l)=>s+l.trend,0)/Math.max(1,listings.length)) }}%
-        </p>
-      </div>
-    </section>
-
-    <!-- Main grid -->
-    <section class="grid lg:grid-cols-3 gap-6">
-      <!-- Left: Listings & Privacy -->
-      <div class="lg:col-span-2 space-y-6">
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">Your Listings</h2>
-            <span class="text-xs text-white/50">30 days</span>
-          </div>
-
-          <div class="mt-3 divide-y divide-white/10">
-            <div v-for="l in listings" :key="l.id" class="py-3 flex items-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/70">
-                <!-- placeholder thumb -->
-                {{ l.title.split(' ').map(w=>w[0]).slice(0,2).join('') }}
-              </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <NuxtLink :to="`/spaces/${l.id}`" class="font-medium hover:underline truncate">{{ l.title }}</NuxtLink>
-                  <span class="text-xs text-white/50 truncate">Â· {{ l.city }} {{ l.country ? 'Â· ' + l.country : '' }}</span>
-                </div>
-
-                <div class="mt-1 grid grid-cols-3 gap-3 items-center">
-                  <div class="text-sm">
-                    <span class="text-white/60">Views</span>
-                    <span class="ml-2 font-medium">{{ fmt(l.views30d) }}</span>
-                  </div>
-                  <div class="text-sm">
-                    <span class="text-white/60">Hits</span>
-                    <span class="ml-2 font-medium">{{ fmt(l.hits30d) }}</span>
-                  </div>
-                  <div class="text-sm">
-                    <span class="text-white/60">Trend</span>
-                    <span class="ml-2 font-medium" :class="pctColor(l.trend)">{{ l.trend }}%</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Sparkline -->
-              <div class="hidden md:block w-[160px] h-[46px]">
-                <svg viewBox="0 0 160 46" class="w-full h-full">
-                  <polyline
-                    :points="l.spark.map((v,i)=>`${Math.round(i*(160/29))},${46 - Math.round((v/100)*40) - 3}`).join(' ')"
-                    fill="none" stroke="currentColor" stroke-width="2" class="text-white/70"
-                  />
-                </svg>
-              </div>
-
-              <!-- Privacy controls -->
-              <div class="flex items-center gap-2">
-                <select
-                  class="px-2 py-1 rounded-lg bg-white/5 border border-white/15 text-sm"
-                  :disabled="savingId===l.id"
-                  v-model="l.privacy"
-                  @change="setPrivacy(l, l.privacy)"
-                >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                  <option value="pin">PIN</option>
-                </select>
-
-                <div v-if="l.privacy==='pin'" class="flex items-center gap-2">
-                  <input
-                    v-model="l.pinCode"
-                    placeholder="PIN"
-                    class="w-[88px] px-2 py-1 rounded-lg bg-white/5 border border-white/15 text-sm"
-                    @change="savePrivacy(l)"
-                  />
-                  <button class="btn btn-ghost text-xs" @click="generatePin(l)">Generate</button>
-                  <button class="btn btn-ghost text-xs" :disabled="!l.pinCode" @click="copyInvite(l)">Copy link</button>
-                </div>
-
-                <NuxtLink :to="`/upload?id=${l.id}`" class="btn btn-ghost text-xs">Edit</NuxtLink>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Access Requests -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">Access Requests</h2>
-            <span class="text-xs text-white/50">{{ accessRequests.filter(r=>r.status==='pending').length }} pending</span>
-          </div>
-
-          <div v-if="accessRequests.length" class="mt-3 divide-y divide-white/10">
-            <div v-for="r in accessRequests" :key="r.id" class="py-3 flex items-center justify-between gap-3">
-              <div class="min-w-0">
-                <p class="text-sm">
-                  <span class="text-white/80">{{ r.email }}</span>
-                  <span class="text-white/50"> requests access to </span>
-                  <span class="text-white/80">{{ (listings.find(l=>l.id===r.listingId)?.title) || r.listingId }}</span>
-                </p>
-                <p v-if="r.note" class="text-xs text-white/50 mt-1 truncate">{{ r.note }}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <span
-                  class="px-2 py-1 rounded-md text-xs"
-                  :class="{
-                    'bg-yellow-500/20 border border-yellow-500/30': r.status==='pending',
-                    'bg-emerald-500/20 border border-emerald-500/30': r.status==='approved',
-                    'bg-red-500/20 border border-red-500/30': r.status==='rejected'
-                  }"
-                >{{ r.status }}</span>
-                <button v-if="r.status==='pending'" class="btn btn-ghost text-xs" @click="approveReq(r)">Approve</button>
-                <button v-if="r.status==='pending'" class="btn btn-ghost text-xs" @click="rejectReq(r)">Reject</button>
-              </div>
-            </div>
-          </div>
-          <p v-else class="text-sm text-white/60 mt-2">No requests yet.</p>
+    <!-- Area KPIs -->
+    <h2 class="text-xl font-semibold mt-8 mb-3">Area Trends ({{ area }})</h2>
+    <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-4">
+      <div
+        v-for="k in (areaKpis.length ? areaKpis : [{name:'No data', value:'—', delta:'—'}])"
+        :key="k.name"
+        class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
+      >
+        <div class="text-xs text-white/60">{{ k.name }}</div>
+        <div class="text-2xl font-semibold mt-1">{{ k.value }}</div>
+        <div class="mt-1 text-xs" :class="k.delta.includes('-') ? 'text-red-300' : (k.delta.includes('+') ? 'text-emerald-300' : 'text-white/60')">
+          {{ k.delta }}
         </div>
       </div>
+    </div>
 
-      <!-- Right: Trends & News -->
-      <div class="space-y-6">
-        <!-- Hot properties -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">Hot Properties</h2>
-            <input v-model="userCity" class="px-2 py-1 rounded-lg bg-white/5 border border-white/15 text-xs w-[150px]" placeholder="Your city" />
-          </div>
-          <p class="text-xs text-white/50 mt-1">Local: {{ userCity || 'â€”' }}</p>
-
-          <div class="mt-3 grid grid-cols-1 gap-3">
-            <div>
-              <h3 class="text-sm text-white/70 mb-2">Local</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <NuxtLink v-for="l in hotLocal" :key="l.id" :to="`/spaces/${l.id}`" class="rounded-xl border border-white/10 bg-white/[0.04] p-3 hover:bg-white/[0.08]">
-                  <p class="font-medium truncate">{{ l.title }}</p>
-                  <p class="text-xs text-white/60 mt-1">{{ l.city }} Â· {{ fmt(l.hits30d) }} hits</p>
-                </NuxtLink>
-              </div>
-            </div>
-            <div>
-              <h3 class="text-sm text-white/70 mb-2">Global</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <NuxtLink v-for="l in hotGlobal" :key="l.id" :to="`/spaces/${l.id}`" class="rounded-xl border border-white/10 bg-white/[0.04] p-3 hover:bg-white/[0.08]">
-                  <p class="font-medium truncate">{{ l.title }}</p>
-                  <p class="text-xs text-white/60 mt-1">{{ l.city }} Â· {{ fmt(l.views30d) }} views</p>
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Area Trends -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">Area Trends</h2>
-            <input v-model="area" class="px-2 py-1 rounded-lg bg-white/5 border border-white/15 text-xs w-[190px]" />
-          </div>
-          <div class="mt-3 grid grid-cols-2 gap-3">
-            <div v-for="k in areaKpis" :key="k.name" class="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-              <p class="text-xs text-white/60">{{ k.name }}</p>
-              <p class="text-lg font-semibold mt-1">{{ k.value }}</p>
-              <p class="text-xs text-white/60 mt-1">{{ k.delta }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- News -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">News</h2>
-            <NuxtLink to="/spaces" class="text-xs text-white/60 hover:underline">View all</NuxtLink>
-          </div>
-          <div class="mt-3 space-y-3">
-            <div v-for="n in news" :key="n.id" class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="text-sm leading-tight">
-                  <span class="font-medium">{{ n.title }}</span>
-                </p>
-                <p class="text-xs text-white/50 mt-1">{{ n.source }} Â· {{ n.time }}</p>
-              </div>
-              <a v-if="n.url" :href="n.url" target="_blank" class="text-xs underline">Open</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recently Viewed -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-medium">Recently Viewed</h2>
-            <NuxtLink to="/recent" class="text-xs text-white/60 hover:underline">See all</NuxtLink>
-          </div>
-          <div class="mt-3 grid grid-cols-1 gap-2">
-            <NuxtLink
-              v-for="v in recentlyViewed"
-              :key="v.id"
-              :to="`/spaces/${v.id}`"
-              class="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.08]"
-            >
-              <span class="truncate">{{ v.title }}</span>
-              <span class="text-xs text-white/50">{{ new Date(v.at).toLocaleString() }}</span>
-            </NuxtLink>
-          </div>
+    <!-- Access Requests -->
+    <h2 class="text-xl font-semibold mt-8 mb-3">Access Requests</h2>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div
+        v-for="r in (accessRequests.length ? accessRequests : [{id:'-',listingId:'—',email:'—',status:'pending', createdAt:new Date().toISOString()}])"
+        :key="r.id"
+        class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
+      >
+        <div class="text-sm font-medium">{{ r.email }}</div>
+        <div class="text-xs text-white/60 mt-1">Listing: <span class="font-mono">{{ r.listingId }}</span></div>
+        <div class="text-xs text-white/60">When: {{ new Date(r.createdAt).toLocaleString() }}</div>
+        <div class="mt-3 flex gap-2">
+          <button class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-xs" @click="r.status='approved'">Approve</button>
+          <button class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-xs" @click="r.status='rejected'">Reject</button>
         </div>
       </div>
-    </section>
+    </div>
+
+    <!-- News -->
+    <h2 class="text-xl font-semibold mt-8 mb-3">News</h2>
+    <div class="grid md:grid-cols-3 gap-4">
+      <a
+        v-for="n in (news.length ? news : [{id:'n0', title:'No news yet', source:'', time:'', url:'#'}])"
+        :key="n.id"
+        :href="n.url || '#'"
+        target="_blank"
+        class="rounded-xl border border-white/10 bg-white/[0.05] p-4 hover:bg-white/[0.08] transition"
+      >
+        <div class="font-medium">{{ n.title }}</div>
+        <div class="text-xs text-white/60 mt-1">{{ n.source }} <span v-if="n.time">• {{ n.time }}</span></div>
+      </a>
+    </div>
+
+    <!-- Recently Viewed -->
+    <h2 class="text-xl font-semibold mt-8 mb-3">Recently Viewed</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" v-if="recentlyViewed.length">
+      <div
+        v-for="it in recentlyViewed"
+        :key="`${it.id}-${it.at}`"
+        class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
+      >
+        <div class="text-sm font-medium">ID: <span class="font-mono">{{ it.id }}</span></div>
+        <div class="text-xs text-white/60 mt-1">At: {{ new Date(it.at).toLocaleString() }}</div>
+        <NuxtLink :to="`/spaces/${it.id}`" class="inline-flex mt-3 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-sm">
+          Open
+        </NuxtLink>
+      </div>
+    </div>
+    <div v-else class="text-white/60 text-sm">No recent items yet. Open a space detail page to populate this.</div>
   </div>
 </template>

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { applyFilters, buildFacets, makeDefaultFilters, type Filters } from '~/server/utils/filtering'
 type ApiResp<T> = { data?: T; count?: number; error?: any } | T
 const { data: raw } = await useAsyncData('spaces-properties', () => $fetch<ApiResp<any[]>>('/api/properties'))

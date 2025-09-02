@@ -1,6 +1,9 @@
 // server/api/listings/[id]/privacy.post.ts
 import { defineEventHandler, readBody, createError } from 'h3'
-import type { ListingRow } from '../../index.get'
+// Update the import path below to the correct location of ListingRow, for example:
+import type { ListingRow } from '../index.get'
+// Or, if ListingRow is simple, define it directly here:
+// type ListingRow = { id: string; privacy: 'public' | 'private' | 'pin'; pinCode?: string | null; updatedAt?: string; /* other fields */ };
 
 type Body = { privacy: 'public' | 'private' | 'pin'; pinCode?: string | null }
 

@@ -12,7 +12,7 @@ async function submit() {
   sending.value = true
   err.value = null
   try {
-    const res = await $fetch<{ ok: boolean }>('/api/access-requests', {
+    const res = await $fetch<{ ok: boolean }>('~/server/api/access-requests', {
       method: 'POST',
       body: { listingId, email: email.value, note: note.value }
     })

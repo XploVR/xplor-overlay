@@ -1,6 +1,6 @@
 // server/api/access-requests.post.ts
 import { defineEventHandler, readBody, createError } from 'h3'
-import type { AccessRequest } from './access-requests/index.get'
+import type { AccessRequest } from '~/server/api/access-requests/index.get'
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

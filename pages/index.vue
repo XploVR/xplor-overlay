@@ -1,290 +1,189 @@
-﻿<!-- pages/index.vue -->
+<!-- pages/index.vue -->
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-
-// --- data types (relaxed so it adapts to your current API) ---
-type Space = {
-  id: string
-  title: string
-  city?: string
-  country?: string
-  kind?: string
-  lat?: number | null
-  lng?: number | null
-  image?: string | null
-  href?: string
-}
-
-// --- state ---
-const q = ref('')
-const spaces = ref<Space[]>([])
-const loading = ref(true)
-const loadErr = ref<string | null>(null)
-
-// --- map refs ---
-const mapEl = ref<HTMLElement | null>(null)
-let map: any = null
-let maplibregl: any = null
-
-// --- tiny helpers ---
-const placeholderImg =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360">
-  <rect width="100%" height="100%" fill="#f3f4f6"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-family="sans-serif" font-size="16">
-    No image
-  </text>
-</svg>`)
-
-function normalize(raw: any): Space {
-  // Try to map common property/spaces shapes to our Space type
-  return {
-    id: String(raw.id ?? raw.slug ?? cryptoRandom('s')),
-    title: String(raw.title ?? raw.name ?? 'Untitled'),
-    city: raw.city ?? raw.location?.city ?? raw.address?.city ?? undefined,
-    country: raw.country ?? raw.location?.country ?? undefined,
-    kind: raw.kind ?? raw.type ?? undefined,
-    lat: raw.lat ?? raw.latitude ?? raw.location?.lat ?? null,
-    lng: raw.lng ?? raw.longitude ?? raw.location?.lng ?? null,
-    image:
-      raw.image ??
-      raw.cover ?? 
-      raw.thumbnail ??
-      raw.media?.primary?.url ??
-      raw.media?.primaryPhotos?.[0]?.url ??
-      null,
-    href: raw.href ?? (raw.id ? `/spaces/${raw.id}` : undefined),
-  }
-}
-
-function cryptoRandom(prefix = 'x') {
-  try {
-    const bytes = crypto.getRandomValues(new Uint8Array(6))
-    const b64 = btoa(String.fromCharCode(...bytes)).replace(/[^a-z0-9]/gi, '').slice(0, 8)
-    return `${prefix}_${b64}`
-  } catch {
-    return `${prefix}_${Math.random().toString(36).slice(2, 10)}`
-  }
-}
-
-// --- fetch spaces on client (keeps SSR simple while your API settles) ---
-onMounted(async () => {
-  loading.value = true
-  loadErr.value = null
-  const endpoints = ['/api/properties', '/api/spaces', '/api/listings']
-  let found: any[] | null = null
-
-  for (const url of endpoints) {
-    try {
-      const res = await $fetch<any>(url, { method: 'GET' })
-      if (Array.isArray(res)) { found = res; break }
-      if (Array.isArray((res as any)?.data)) { found = (res as any).data; break }
-    } catch (e: any) {
-      // keep trying
-    }
-  }
-
-  if (!found) {
-    // fallback demo data so the UI is usable immediately
-    found = [
-      { id: 'demo1', title: 'Beachfront Villa', city: 'Marbella', country: 'ES', kind: 'real_estate', lat: 36.5099, lng: -4.8850, image: null },
-      { id: 'demo2', title: 'Dubai Marina Tower', city: 'Dubai', country: 'AE', kind: 'development', lat: 25.0800, lng: 55.1400, image: null },
-      { id: 'demo3', title: 'Gallery Pop-up', city: 'London', country: 'UK', kind: 'gallery', lat: 51.5074, lng: -0.1278, image: null },
-    ]
-  }
-
-  spaces.value = found.map(normalize)
-  loading.value = false
-
-  // init map after we have data
-  await initMap()
-  addMarkers()
-})
-
-// --- map setup with CDN fallback ---
-async function initMap() {
-  if (!mapEl.value) return
-  if (map) return
-
-  // Try ESM first
-  try {
-    maplibregl = (await import('maplibre-gl')).default
-    await ensureMapLibreCss()
-  } catch {
-    // Fallback to CDN (no build needed)
-    await injectScript('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js', 'maplibre-gl-js')
-    await injectCss('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css', 'maplibre-gl-css')
-    maplibregl = (window as any).maplibregl
-  }
-
-  if (!maplibregl) return
-
-  map = new maplibregl.Map({
-    container: mapEl.value,
-    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-    center: [-3.7038, 40.4168], // Madrid
-    zoom: 2.5,
-    attributionControl: true,
-  })
-
-  // controls
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
-}
-
-function addMarkers() {
-  if (!map || !maplibregl) return
-  const pts = spaces.value.filter(s => isFinite(Number(s.lng)) && isFinite(Number(s.lat)))
-  if (!pts.length) return
-
-  const bounds = new maplibregl.LngLatBounds()
-  pts.forEach((s) => {
-    const el = document.createElement('div')
-    el.className = 'marker'
-    el.style.cssText = 'width:12px;height:12px;border-radius:9999px;background:#111;box-shadow:0 0 0 2px #fff;'
-    const m = new maplibregl.Marker({ element: el })
-      .setLngLat([Number(s.lng), Number(s.lat)])
-      .setPopup(
-        new maplibregl.Popup({ offset: 12 }).setHTML(
-          `<div style="font-family:system-ui,ui-sans-serif,sans-serif;font-size:12px;">
-            <strong>${escapeHtml(s.title)}</strong><br/>
-            ${[s.city, s.country].filter(Boolean).join(', ')}
-          </div>`
-        )
-      )
-      .addTo(map)
-    bounds.extend([Number(s.lng), Number(s.lat)])
-  })
-
-  try {
-    map.fitBounds(bounds, { padding: 60, duration: 800, maxZoom: 12 })
-  } catch {}
-}
-
-function escapeHtml(str?: string) {
-  return (str || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c] as string))
-}
-
-// --- utilities to load CSS/JS when ESM import fails ---
-function injectScript(src: string, id: string) {
-  return new Promise<void>((resolve, reject) => {
-    if (document.getElementById(id)) return resolve()
-    const s = document.createElement('script')
-    s.id = id
-    s.src = src
-    s.async = true
-    s.onload = () => resolve()
-    s.onerror = (e) => reject(e)
-    document.head.appendChild(s)
-  })
-}
-function injectCss(href: string, id: string) {
-  return new Promise<void>((resolve, reject) => {
-    if (document.getElementById(id)) return resolve()
-    const l = document.createElement('link')
-    l.id = id
-    l.rel = 'stylesheet'
-    l.href = href
-    l.onload = () => resolve()
-    l.onerror = (e) => reject(e)
-    document.head.appendChild(l)
-  })
-}
-async function ensureMapLibreCss() {
-  // when using ESM, MapLibre doesn't auto-inject CSS — add it once
-  const existing = document.getElementById('maplibre-gl-css')
-  if (existing) return
-  await injectCss('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css', 'maplibre-gl-css')
-}
-
-// --- filtering ---
-const filtered = computed(() => {
-  const term = q.value.trim().toLowerCase()
-  if (!term) return spaces.value
-  return spaces.value.filter((s) =>
-    [s.title, s.city, s.country, s.kind]
-      .filter(Boolean)
-      .some(v => String(v).toLowerCase().includes(term))
-  )
-})
+definePageMeta({ layout: 'default' })
+import landingHero from '@/assets/images/landing-hero.jpg'
 </script>
 
 <template>
-  <div class="container-x py-8 space-y-8">
-    <!-- Hero / Search -->
-    <section class="space-y-3">
-      <h1 class="font-display text-2xl md:text-3xl tracking-tight">Explore Spaces</h1>
-      <p class="text-sm text-x-deep/70">Search the latest virtual tours and listings on the map or in the grid.</p>
-      <div class="flex gap-2">
-        <input
-          v-model="q"
-          placeholder="Search by title, city, country, type…"
-          class="flex-1 rounded-xl border px-4 py-2"
-        />
-        <span class="text-xs text-x-gray2 self-center">{{ filtered.length }} results</span>
-      </div>
-    </section>
+  <!-- HERO -->
+  <section class="pt-2 md:pt-4 pb-12 md:pb-16">
+    <div class="rounded-3xl overflow-hidden relative border border-white/10 bg-white/[0.04]">
+      <!-- Background image -->
+      <div
+        class="relative h-[62vh] md:h-[75vh] bg-cover bg-center"
+        :style="{ backgroundImage: `url(${landingHero})` }"
+      >
+        <!-- Radial highlight (under the main gradient) -->
+        <div
+          class="absolute inset-0 pointer-events-none z-[5]
+                 bg-[radial-gradient(circle_at_30%_10%,rgba(232,247,147,0.12),transparent_40%),radial-gradient(circle_at_80%_50%,rgba(232,247,147,0.07),transparent_40%)]">
+        </div>
 
-    <!-- Map -->
-    <section>
-      <ClientOnly>
-        <div ref="mapEl" class="h-72 md:h-96 rounded-2xl border border-x-gray/40 overflow-hidden"></div>
-        <template #fallback>
-          <div class="h-72 md:h-96 rounded-2xl border border-dashed grid place-items-center text-sm text-x-gray2">
-            Loading map…
+        <!-- LEFT→RIGHT BLACK GRADIENT OVERLAY (always works, no Tailwind dependency) -->
+        <div
+          class="absolute inset-0 pointer-events-none z-[10]"
+          style="background: linear-gradient(90deg,
+                  rgba(0,0,0,0.85) 0%,
+                  rgba(0,0,0,0.55) 35%,
+                  rgba(0,0,0,0.20) 65%,
+                  rgba(0,0,0,0.00) 100%);">
+        </div>
+
+        <!-- Content -->
+        <div class="absolute inset-0 z-[20] flex items-center">
+          <div class="p-6 md:p-10 max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
+              <BrandXplor size="10xl" />
+              Everywhere,<br class="hidden md:block" />
+              In Real Time.
+            </h1>
+            <p class="mt-4 text-lg text-white/80">
+              Xplor.io is a universal platform for immersive tours — real estate, yachts, galleries,
+              resorts, cities, and beyond.
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <NuxtLink to="/spaces" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
+                Start exploring
+              </NuxtLink>
+              <NuxtLink to="/upload" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">
+                List your space
+              </NuxtLink>
+            </div>
           </div>
-        </template>
-      </ClientOnly>
-      <p v-if="loadErr" class="mt-2 text-xs text-red-600">Error: {{ loadErr }}</p>
-    </section>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- Grid -->
-    <section class="space-y-3">
-      <h2 class="font-display text-xl">Latest</h2>
-
-      <div v-if="loading" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="i in 6" :key="i" class="animate-pulse rounded-2xl border p-3">
-          <div class="aspect-video rounded-lg bg-gray-100 mb-3"></div>
-          <div class="h-4 bg-gray-100 rounded w-2/3 mb-2"></div>
-          <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+  <!-- WHAT IS XPLOR -->
+  <section id="what" class="py-10 md:py-14">
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="rounded-2xl border border-white/10 bg-white/[0.04] aspect-[4/3] flex items-center justify-center">
+        <div class="text-center text-white/60">
+          (Device mockups / screenshots here)
         </div>
       </div>
 
-      <div v-else class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <article
-          v-for="s in filtered"
-          :key="s.id"
-          class="group rounded-2xl border border-x-gray/40 overflow-hidden bg-white/80 hover:shadow-sm transition-shadow"
-        >
-          <NuxtLink :to="s.href || '#'" class="block">
-            <div class="aspect-video bg-gray-100 overflow-hidden">
-              <img
-                :src="s.image || placeholderImg"
-                alt=""
-                class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div class="p-3">
-              <h3 class="font-semibold truncate">{{ s.title }}</h3>
-              <p class="text-xs text-x-gray2 mt-1 truncate">
-                <span v-if="s.kind" class="uppercase tracking-wide">{{ s.kind }}</span>
-                <span v-if="s.kind && (s.city || s.country)"> • </span>
-                {{ [s.city, s.country].filter(Boolean).join(', ') }}
-              </p>
-            </div>
+      <div>
+        <h2 class="text-3xl font-semibold tracking-tight">What is Xplor?</h2>
+        <p class="mt-3 text-white/70">
+          Xplor.io lets you publish and discover immersive spaces. Upload 360° or 3D tours
+          (Matterport, 3DVista, Kuula, custom), geotag them on an interactive Mapbox map,
+          and share or embed everywhere — no app required.
+        </p>
+        <ul class="mt-6 space-y-2 text-sm text-white/60">
+          <li>• Universal tour support (360°, 3D, video, galleries)</li>
+          <li>• Geospatial search & global discovery</li>
+          <li>• Clean embeds for websites & listings</li>
+          <li>• Built with Supabase, Mapbox, Nuxt</li>
+        </ul>
+        <div class="mt-6">
+          <NuxtLink to="/spaces" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">
+            Explore spaces
           </NuxtLink>
-        </article>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <div v-if="!loading && filtered.length === 0" class="text-sm text-x-gray2">
-        No results match “{{ q }}”.
+  <!-- VERTICALS -->
+  <section id="verticals" class="py-10 md:py-14">
+    <h2 class="text-3xl font-semibold tracking-tight">Key Verticals</h2>
+    <p class="mt-2 text-white/70">From luxury rentals to cultural venues — Xplor is built for every kind of space.</p>
+
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+      <NuxtLink to="/upload?type=real_estate"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🏡 Real Estate</div><p class="text-sm text-white/70 mt-1">Homes, villas, offices</p></NuxtLink>
+      <NuxtLink to="/upload?type=developments"  class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🏗️ Developments</div><p class="text-sm text-white/70 mt-1">New builds & masterplans</p></NuxtLink>
+      <NuxtLink to="/upload?type=yachts"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🛥️ Yachts</div><p class="text-sm text-white/70 mt-1">Charter & sales</p></NuxtLink>
+      <NuxtLink to="/upload?type=hospitality"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🏨 Hospitality</div><p class="text-sm text-white/70 mt-1">Hotels & resorts</p></NuxtLink>
+      <NuxtLink to="/upload?type=galleries"     class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🎨 Galleries</div><p class="text-sm text-white/70 mt-1">Museums & studios</p></NuxtLink>
+      <NuxtLink to="/upload?type=automotive"    class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🚗 Automotive</div><p class="text-sm text-white/70 mt-1">Showrooms & events</p></NuxtLink>
+      <NuxtLink to="/upload?type=aviation"      class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">✈️ Aviation</div><p class="text-sm text-white/70 mt-1">Jets & terminals</p></NuxtLink>
+      <NuxtLink to="/upload?type=sports"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🏟️ Sports Facilities</div><p class="text-sm text-white/70 mt-1">Clubs & complexes</p></NuxtLink>
+      <NuxtLink to="/upload?type=retail"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">🛍️ Retail</div><p class="text-sm text-white/70 mt-1">Stores & pop-ups</p></NuxtLink>
+    </div>
+  </section>
+
+  <!-- FAIRSEAS -->
+  <section id="fairseas" class="py-10 md:py-14">
+    <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] p-6 md:p-10">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl font-semibold tracking-tight">FairSeas by Xplor</h2>
+          <p class="mt-3 text-white/70">
+            FairSeas is our next-gen yacht brokerage model: we share <strong>50% of net charter commission with the crew</strong>.
+            Happy crew → better service → repeat charters.
+          </p>
+          <ul class="mt-6 space-y-2 text-sm text-white/60">
+            <li>• Transparent commission-sharing (crew-first)</li>
+            <li>• CRI+ (Crew Rating Index) for measurable quality</li>
+            <li>• Owners see higher guest satisfaction & utilization</li>
+          </ul>
+          <div class="mt-6 flex gap-3">
+            <NuxtLink to="/fairseas" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
+              Learn more
+            </NuxtLink>
+            <NuxtLink to="/upload?type=yachts" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">
+              List a yacht
+            </NuxtLink>
+            <NuxtLink to="/fairseas" class="px-5 py-3 rounded-xl border bg-x-turquoise-500 hover:bg-x-turquoise-200">
+              Join FairSeas
+            </NuxtLink>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-[radial-gradient(60%_60%_at_50%_30%,rgba(232,247,147,0.15),transparent)] h-[260px] md:h-[320px] flex items-center justify-center">
+          <div class="text-center text-white/60"> (Yacht/crew imagery here) </div>
+        </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="py-10 md:py-14">
+    <h2 class="text-3xl font-semibold tracking-tight">How it works</h2>
+    <div class="mt-6 grid md:grid-cols-3 gap-4">
+      <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
+        <div class="text-xl font-medium">1) Upload your space</div>
+        <p class="text-sm text-white/70 mt-1">Add title, location, media (photos, 360°, video, 3D).</p>
+      </div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
+        <div class="text-xl font-medium">2) Get discovered</div>
+        <p class="text-sm text-white/70 mt-1">Your listing appears on the global Xplor map and in search.</p>
+      </div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
+        <div class="text-xl font-medium">3) Share & monetize</div>
+        <p class="text-sm text-white/70 mt-1">Embed tours, capture leads, book viewings or charters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST / TECH -->
+  <section id="tech" class="py-10 md:py-14">
+    <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5 md:p-6">
+      <div class="flex flex-wrap items-center gap-6 text-sm text-white/70">
+        <span class="opacity-80">Built with</span>
+        <span class="px-3 py-1 rounded border border-white/10">Nuxt</span>
+        <span class="px-3 py-1 rounded border border-white/10">Supabase</span>
+        <span class="px-3 py-1 rounded border border-white/10">Mapbox</span>
+        <span class="px-3 py-1 rounded border border-white/10">H3</span>
+        <span class="px-3 py-1 rounded border border-white/10">Matterport</span>
+        <span class="px-3 py-1 rounded border border-white/10">3DVista</span>
+        <span class="px-3 py-1 rounded border border-white/10">Kuula</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section id="cta" class="py-12 md:py-16">
+    <div class="rounded-3xl overflow-hidden border border-white/10 bg-[radial-gradient(80%_80%_at_50%_10%,rgba(232,247,147,0.12),transparent)] p-8 md:p-12 text-center">
+      <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Join the exploration revolution</h2>
+      <p class="mt-3 text-white/70">Discover immersive spaces, or list your own today.</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <NuxtLink to="/spaces" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">Start exploring</NuxtLink>
+        <NuxtLink to="/upload" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">List your space</NuxtLink>
+      </div>
+    </div>
+  </section>
 </template>
-
-<style scoped>
-/* optional: nicer marker hover target on touch */
-.marker { cursor: pointer; }
-</style>
