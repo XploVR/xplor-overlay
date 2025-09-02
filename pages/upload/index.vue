@@ -6,9 +6,10 @@ import { useRuntimeConfig } from '#app'
 import type { ListingDraft } from '~/types/media'
 import { useAutosave } from '~/composables/useAutosave'
 import { useUploader } from '~/composables/useUploader'
+
+// If auto-import is off, keep these explicit:
 import UploadZone from '~/components/uploader/UploadZone.vue'
 import MediaList from '~/components/uploader/MediaList.vue'
-
 
 defineOptions({ name: 'UploadPage' })
 
@@ -30,6 +31,25 @@ function downloadJSON(filename: string, data: unknown) {
 }
 
 /* ------------------------------------
+   Type picker (category selection)
+------------------------------------ */
+const typeOptions = [
+  { key: 'real_estate',     label: 'Real Estate',         icon: 'home' },
+  { key: 'developments',    label: 'Developments',        icon: 'building' },
+  { key: 'yachts',          label: 'Yachts',              icon: 'ship' },
+  { key: 'hospitality',     label: 'Hospitality',         icon: 'hotel' },
+  { key: 'galleries',       label: 'Galleries',           icon: 'gallery' },
+  { key: 'automotive',      label: 'Automotive',          icon: 'car' },
+  { key: 'aviation',        label: 'Aviation',            icon: 'plane' },
+  { key: 'sports',          label: 'Sports Facilities',   icon: 'stadium' },
+  { key: 'retail',          label: 'Retail',              icon: 'store' },
+] as const
+
+const route = useRoute()
+const router = useRouter()
+const showTypePicker = ref(true)
+
+/* ------------------------------------
    Draft state + autosave
 ------------------------------------ */
 const draftId = 'draft_001'
@@ -46,6 +66,8 @@ const draft = reactive<ListingDraft>({
     country: '',
     lat: null as number | null,
     lng: null as number | null,
+    // new: listing kind
+    kind: undefined as any, // 'real_estate' | 'developments' | ...
   },
   media: {
     primaryPhotos: [],
@@ -62,6 +84,28 @@ const draft = reactive<ListingDraft>({
 const { state: savedDraft, savedAt, saveNow } =
   useAutosave<ListingDraft>(`xplor_draft_${draftId}`, draft)
 watchEffect(() => Object.assign(draft, savedDraft.value))
+
+// Initialize picker visibility
+onMounted(() => {
+  const qType = (route.query.type as string | undefined) || undefined
+  if (qType && typeOptions.some(t => t.key === qType)) {
+    draft.details.kind = qType as any
+    showTypePicker.value = false
+  } else if (draft.details.kind) {
+    showTypePicker.value = false
+  } else {
+    showTypePicker.value = true
+  }
+})
+
+function selectType(kind: string) {
+  draft.details.kind = kind as any
+  showTypePicker.value = false
+  router.replace({ query: { ...route.query, type: kind } })
+}
+function changeType() {
+  showTypePicker.value = true
+}
 
 /* ------------------------------------
    Uploader (files + URLs) + limits
@@ -98,9 +142,6 @@ const steps = [
   'Additional',
   'Review',
 ] as const
-
-const route = useRoute()
-const router = useRouter()
 
 // read initial step from ?step= (0..8)
 const step = ref(
@@ -140,12 +181,7 @@ const coords = computed<Coords>({
     draft.details.lng = v?.lng ?? null
   }
 })
-const addrModel = computed({
-  get: () => draft.details.addressLine1 || '',
-  set: (v: string) => { draft.details.addressLine1 = v }
-})
 
-// geocoding (Mapbox if token present → Nominatim fallback)
 const cfg = useRuntimeConfig()
 const mapboxToken = (cfg.public?.mapboxToken as string | undefined) || undefined
 const q = ref('')
@@ -409,6 +445,7 @@ type ListingPayload = {
     addressLine1?: string
     lat?: number | null
     lng?: number | null
+    kind?: string
   }
   media: {
     primaryPhotos: { name: string; url?: string; order?: number; primary?: boolean }[]
@@ -436,6 +473,7 @@ function toPayload(d = draft): ListingPayload {
       addressLine1: d.details.addressLine1,
       lat: d.details.lat ?? null,
       lng: d.details.lng ?? null,
+      kind: d.details.kind,
     },
     media: {
       primaryPhotos: d.media.primaryPhotos.map(m => ({
@@ -465,6 +503,7 @@ const PayloadSchema = z.object({
     addressLine1: z.string().optional(),
     lat: z.number().nullable().optional(),
     lng: z.number().nullable().optional(),
+    kind: z.string().optional(),
   }),
   media: z.object({
     primaryPhotos: z.array(z.object({
@@ -492,7 +531,6 @@ async function publish() {
     const payload = toPayload(draft)
     PayloadSchema.parse(payload)
 
-    // NOTE: align this with your real server route
     const res = await $fetch<{ ok?: boolean; id?: string; message?: string }>('/api/properties', {
       method: 'POST',
       body: payload,
@@ -508,7 +546,6 @@ async function publish() {
       err?.message ||
       'Publish failed'
 
-    // Jump the user to likely fix step
     if (publishError.value?.toLowerCase().includes('photo') && step.value !== 1) step.value = 1
     if (publishError.value?.toLowerCase().includes('title') && step.value !== 0) step.value = 0
   } finally {
@@ -521,322 +558,398 @@ async function publish() {
   <div class="container-x py-8 space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Upload a Space</h1>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-semibold">Upload a Space</h1>
+        <span v-if="!showTypePicker && draft.details.kind" class="text-xs px-2 py-1 rounded bg-gray-100">
+          {{ typeOptions.find(t => t.key === draft.details.kind)?.label || draft.details.kind }}
+        </span>
+        <button
+          v-if="!showTypePicker"
+          class="text-xs underline text-x-deep/70"
+          @click="changeType"
+        >
+          Change type
+        </button>
+      </div>
       <div class="text-xs text-x-gray2">
         Last saved: <span class="font-mono">{{ savedAt || '—' }}</span>
       </div>
     </div>
 
-    <!-- Clickable step tabs (sticky) -->
-    <div class="sticky top-16 z-10 bg-white/70 backdrop-blur rounded-xl border p-2 flex flex-wrap gap-2">
-      <button
-        v-for="(label, i) in steps"
-        :key="label"
-        class="px-3 py-1.5 rounded-lg text-sm border transition"
-        :class="i === step ? 'bg-x-yellow/80 text-x-black border-x-gray/40' : 'bg-white hover:bg-gray-50'"
-        @click="step = i"
-      >
-        {{ i + 1 }}. {{ label }}
-      </button>
-    </div>
+    <!-- TYPE PICKER (3 × 3) -->
+    <section v-if="showTypePicker" class="space-y-4">
+      <p class="text-sm text-x-gray2">Choose what you’re uploading:</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <button
+          v-for="opt in typeOptions"
+          :key="opt.key"
+          class="group rounded-2xl aspect-square border bg-white hover:shadow-md hover:bg-gray-50 transition flex flex-col items-center justify-center gap-3"
+          @click="selectType(opt.key)"
+        >
+          <!-- Inline, clean outline icons -->
+          <svg v-if="opt.icon==='home'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 10v9a2 2 0 0 0 2 2h3v-6h4v6h3a2 2 0 0 0 2-2v-9" />
+          </svg>
+          <svg v-else-if="opt.icon==='building'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="8" height="16" rx="1" />
+            <rect x="13" y="8" width="8" height="12" rx="1" />
+            <path d="M6 8h2M6 12h2M6 16h2M16 12h2M16 16h2" />
+          </svg>
+          <svg v-else-if="opt.icon==='ship'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 15l9-3 9 3" />
+            <path d="M4 15l1.5 4h13L20 15" />
+            <path d="M12 6v6" />
+            <path d="M12 6l4-2v4z" />
+          </svg>
+          <svg v-else-if="opt.icon==='hotel'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18V8a2 2 0 0 1 2-2h6a5 5 0 0 1 5 5h5v7" />
+            <path d="M3 18h18" />
+            <path d="M5 14h8" />
+          </svg>
+          <svg v-else-if="opt.icon==='gallery'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <circle cx="9" cy="11" r="2" />
+            <path d="M21 16l-5-5-5 6" />
+          </svg>
+          <svg v-else-if="opt.icon==='car'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5" />
+            <path d="M5 16h14" />
+            <circle cx="7.5" cy="16" r="1.5" />
+            <circle cx="16.5" cy="16" r="1.5" />
+          </svg>
+          <svg v-else-if="opt.icon==='plane'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12l20-6-8 8v6l-4-2v-4z" />
+          </svg>
+          <svg v-else-if="opt.icon==='stadium'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="8" rx="9" ry="3.5" />
+            <path d="M3 8v7c0 2 4 3.5 9 3.5s9-1.5 9-3.5V8" />
+            <path d="M3 12c0 2 4 3.5 9 3.5s9-1.5 9-3.5" />
+          </svg>
+          <svg v-else-if="opt.icon==='store'" viewBox="0 0 24 24" class="w-10 h-10 text-x-deep/90 group-hover:scale-105 transition" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 10l1-4h14l1 4" />
+            <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" />
+            <path d="M8 14h4v5H8z" />
+          </svg>
 
-    <!-- STEP 0: Details + Location -->
-    <section v-if="step === 0" class="card p-4 space-y-4">
-      <div class="grid md:grid-cols-2 gap-4">
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Title *</span>
-          <input v-model="draft.details.title" class="w-full rounded-xl border px-3 py-2" placeholder="e.g., Hillside Finca" />
-        </label>
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">City</span>
-          <input v-model="draft.details.city" class="w-full rounded-xl border px-3 py-2" />
-        </label>
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Country</span>
-          <input v-model="draft.details.country" class="w-full rounded-xl border px-3 py-2" />
-        </label>
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Price (€)</span>
-          <input type="number" v-model.number="draft.details.price" class="w-full rounded-xl border px-3 py-2" />
-        </label>
-        <label class="space-y-1 md:col-span-2">
-          <span class="text-xs text-x-gray2">Address</span>
-          <input v-model="draft.details.addressLine1" class="w-full rounded-xl border px-3 py-2" placeholder="Street & number (auto-filled when you pick on the map)" />
-        </label>
-      </div>
-
-      <!-- Address search -->
-      <div class="space-y-2">
-        <label class="text-xs text-x-gray2">Search address worldwide</label>
-        <div class="relative">
-          <input
-            v-model="q"
-            placeholder="Try '1600 Amphitheatre Pkwy', 'Marbella, ES', 'Dubai Marina'..."
-            class="w-full rounded-xl border px-3 py-2"
-            @change="(e:any) => tryParseLatLng(e?.target?.value || '')"
-          />
-          <div v-if="results.length" class="absolute z-10 mt-1 w-full rounded-xl border bg-white shadow">
-            <button
-              v-for="r in results"
-              :key="r.title + r.lat + r.lng"
-              class="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
-              @click="onPickPlace(r)"
-            >
-              {{ r.title }}
-            </button>
-          </div>
-          <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searching…</div>
-        </div>
-      </div>
-
-      <!-- Map & lat/lng -->
-      <ClientOnly>
-        <div ref="mapEl" class="h-80 rounded-2xl border overflow-hidden" />
-        <template #fallback>
-          <div class="h-80 rounded-2xl border grid place-items-center text-sm text-x-gray2">Loading map…</div>
-        </template>
-      </ClientOnly>
-
-      <div class="grid md:grid-cols-3 gap-3">
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Latitude</span>
-          <input
-            v-model="latStr"
-            :placeholder="draft.details.lat != null ? String(draft.details.lat) : 'e.g., 40.4168'"
-            class="w-full rounded-xl border px-3 py-2"
-          />
-        </label>
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Longitude</span>
-          <input
-            v-model="lngStr"
-            :placeholder="draft.details.lng != null ? String(draft.details.lng) : 'e.g., -3.7038'"
-            class="w-full rounded-xl border px-3 py-2"
-          />
-        </label>
-        <div class="self-end text-xs text-x-gray2">
-          <span v-if="draft.details.lat != null && draft.details.lng != null">
-            Selected: {{ draft.details.lat?.toFixed(6) }}, {{ draft.details.lng?.toFixed(6) }}
-          </span>
-          <span v-else>No location selected</span>
-        </div>
-      </div>
-
-      <label class="space-y-1">
-        <span class="text-xs text-x-gray2">Description</span>
-        <textarea v-model="draft.details.description" rows="4" class="w-full rounded-xl border px-3 py-2" />
-      </label>
-
-      <div class="grid md:grid-cols-2 gap-4">
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Showing Instructions</span>
-          <input v-model="draft.details.showingInstructions" class="w-full rounded-xl border px-3 py-2" />
-        </label>
-        <label class="space-y-1">
-          <span class="text-xs text-x-gray2">Lead Contact Preference</span>
-          <select v-model="draft.details.leadContactPreference" class="w-full rounded-xl border px-3 py-2">
-            <option value="form">Form</option>
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-            <option value="none">None</option>
-          </select>
-        </label>
-      </div>
-    </section>
-
-    <!-- STEP 1: Primary Photos -->
-    <section v-if="step === 1" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Primary photos — {{ media.primaryPhotos.length }}/{{ activeLimits.primaryPhotos }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone
-        label="Drop photos here or click to choose (JPG/PNG/WebP)"
-        accept="image/*"
-        multiple
-        @files="(fs) => addFiles('primaryPhotos', fs)"
-      />
-      <MediaList
-        :items="media.primaryPhotos"
-        primary-mode
-        @update:items="(v) => reorder('primaryPhotos', v)"
-        @primary="setPrimaryPhoto"
-        @remove="(id) => remove('primaryPhotos', id)"
-      />
-    </section>
-
-    <!-- STEP 2: Virtual Tours (URLs) -->
-    <section v-if="step === 2" class="space-y-2 card p-4">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Virtual Tours — {{ media.virtualTours.length }}/{{ activeLimits.virtualTours }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <label class="space-y-1">
-        <span class="text-xs text-x-gray2">Add tour URL (Matterport, etc.)</span>
-        <div class="flex gap-2">
-          <input
-            v-model="tourUrl"
-            placeholder="https://my.matterport.com/..."
-            class="flex-1 rounded-xl border px-3 py-2"
-          />
-          <button
-            class="btn btn-primary"
-            @click="() => { if (tourUrl) { addUrl('virtualTours', tourUrl, 'virtualTour'); tourUrl = ''; } }"
-          >
-            Add
-          </button>
-        </div>
-      </label>
-
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="t in media.virtualTours" :key="t.id" class="card overflow-hidden">
-          <div class="aspect-video">
-            <iframe v-if="t.url" :src="t.url" class="w-full h-full" allowfullscreen />
-          </div>
-          <div class="p-3 flex items-center justify-between text-sm">
-            <span class="truncate">{{ t.name }}</span>
-            <button class="underline" @click="remove('virtualTours', t.id)">Delete</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- STEP 3: Video -->
-    <section v-if="step === 3" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Videos — {{ media.videos.length }}/{{ activeLimits.videos }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone label="Upload videos (MP4/WebM)" accept="video/*" multiple @files="(fs) => addFiles('videos', fs)" />
-      <label class="space-y-1 card p-3">
-        <span class="text-xs text-x-gray2">Or add YouTube/Vimeo URL</span>
-        <div class="flex gap-2">
-          <input v-model="videoUrl" placeholder="https://youtu.be/..." class="flex-1 rounded-xl border px-3 py-2" />
-          <button
-            class="btn btn-primary"
-            @click="() => { if (videoUrl) { addUrl('videos', videoUrl, 'video'); videoUrl = ''; } }"
-          >
-            Add
-          </button>
-        </div>
-      </label>
-      <MediaList
-        :items="media.videos"
-        @update:items="(v) => reorder('videos', v)"
-        @remove="(id) => remove('videos', id)"
-      />
-    </section>
-
-    <!-- STEP 4: Drone -->
-    <section v-if="step === 4" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Drone — {{ media.drone.length }}/{{ activeLimits.drone }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone label="Drone photos/videos" accept="image/*,video/*" multiple @files="(fs) => addFiles('drone', fs)" />
-      <MediaList
-        :items="media.drone"
-        @update:items="(v) => reorder('drone', v)"
-        @remove="(id) => remove('drone', id)"
-      />
-    </section>
-
-    <!-- STEP 5: Floor Plans -->
-    <section v-if="step === 5" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Floor Plans — {{ media.floorPlans.length }}/{{ activeLimits.floorPlans }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone
-        label="Floor plans (PDF/JPG/PNG)"
-        accept="application/pdf,image/*"
-        multiple
-        @files="(fs) => addFiles('floorPlans', fs)"
-      />
-      <MediaList
-        :items="media.floorPlans"
-        @update:items="(v) => reorder('floorPlans', v)"
-        @remove="(id) => remove('floorPlans', id)"
-      />
-    </section>
-
-    <!-- STEP 6: Documents -->
-    <section v-if="step === 6" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Documents — {{ media.documents.length }}/{{ activeLimits.documents }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone label="Documents (PDF)" accept="application/pdf" multiple @files="(fs) => addFiles('documents', fs)" />
-      <MediaList
-        :items="media.documents"
-        @update:items="(v) => reorder('documents', v)"
-        @remove="(id) => remove('documents', id)"
-      />
-    </section>
-
-    <!-- STEP 7: Additional -->
-    <section v-if="step === 7" class="space-y-2">
-      <div class="flex items-center justify-between">
-        <p class="text-sm">
-          Additional — {{ media.additional.length }}/{{ activeLimits.additional }}
-        </p>
-        <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
-      </div>
-
-      <UploadZone
-        label="Additional media (brochures, photos)"
-        accept="image/*,application/pdf"
-        multiple
-        @files="(fs) => addFiles('additional', fs)"
-      />
-      <MediaList
-        :items="media.additional"
-        @update:items="(v) => reorder('additional', v)"
-        @remove="(id) => remove('additional', id)"
-      />
-    </section>
-
-    <!-- STEP 8: Review -->
-    <section v-if="step === 8" class="card p-4 space-y-3">
-      <h3 class="font-medium">Preview</h3>
-      <p class="text-sm text-x-gray2">
-        Use the JSON export for API testing or visit <code>/preview</code> for a print/PDF view.
-      </p>
-      <div class="flex gap-2">
-        <button class="btn btn-ghost" @click="downloadJSON(`xplor_draft_${draftId}`, draft)">Export JSON</button>
-        <button class="btn btn-primary" :disabled="publishing" @click="publish">
-          <span v-if="publishing">Publishing…</span>
-          <span v-else>Publish</span>
+          <span class="text-sm font-medium text-x-deep/90">{{ opt.label }}</span>
         </button>
       </div>
-      <p v-if="publishError" class="text-sm text-red-600 mt-1">{{ publishError }}</p>
     </section>
 
-    <!-- Wizard Nav -->
-    <div class="flex items-center justify-between pt-2">
-      <button class="btn btn-ghost" :disabled="step === 0" @click="goBack">Back</button>
-      <div class="flex gap-2">
-        <button class="btn btn-ghost" @click="saveNow">Save Draft</button>
-        <button class="btn btn-alt" :disabled="step === steps.length - 1" @click="goNext">Next</button>
+    <!-- STEPS (hidden until a type is chosen) -->
+    <template v-else>
+      <!-- Clickable step tabs (sticky) -->
+      <div class="sticky top-16 z-10 bg-white/70 backdrop-blur rounded-xl border p-2 flex flex-wrap gap-2">
+        <button
+          v-for="(label, i) in steps"
+          :key="label"
+          class="px-3 py-1.5 rounded-lg text-sm border transition"
+          :class="i === step ? 'bg-x-yellow/80 text-x-black border-x-gray/40' : 'bg-white hover:bg-gray-50'"
+          @click="step = i"
+        >
+          {{ i + 1 }}. {{ label }}
+        </button>
       </div>
-    </div>
+
+      <!-- STEP 0: Details + Location -->
+      <section v-if="step === 0" class="card p-4 space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Title *</span>
+            <input v-model="draft.details.title" class="w-full rounded-xl border px-3 py-2" placeholder="e.g., Hillside Finca" />
+          </label>
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">City</span>
+            <input v-model="draft.details.city" class="w-full rounded-xl border px-3 py-2" />
+          </label>
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Country</span>
+            <input v-model="draft.details.country" class="w-full rounded-xl border px-3 py-2" />
+          </label>
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Price (€)</span>
+            <input type="number" v-model.number="draft.details.price" class="w-full rounded-xl border px-3 py-2" />
+          </label>
+          <label class="space-y-1 md:col-span-2">
+            <span class="text-xs text-x-gray2">Address</span>
+            <input v-model="draft.details.addressLine1" class="w-full rounded-xl border px-3 py-2" placeholder="Street & number (auto-filled when you pick on the map)" />
+          </label>
+        </div>
+
+        <!-- Address search -->
+        <div class="space-y-2">
+          <label class="text-xs text-x-gray2">Search address worldwide</label>
+          <div class="relative">
+            <input
+              v-model="q"
+              placeholder="Try '1600 Amphitheatre Pkwy', 'Marbella, ES', 'Dubai Marina'..."
+              class="w-full rounded-xl border px-3 py-2"
+              @change="(e:any) => tryParseLatLng(e?.target?.value || '')"
+            />
+            <div v-if="results.length" class="absolute z-10 mt-1 w-full rounded-xl border bg-white shadow">
+              <button
+                v-for="r in results"
+                :key="r.title + r.lat + r.lng"
+                class="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
+                @click="onPickPlace(r)"
+              >
+                {{ r.title }}
+              </button>
+            </div>
+            <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searching…</div>
+          </div>
+        </div>
+
+        <!-- Map & lat/lng -->
+        <ClientOnly>
+          <div ref="mapEl" class="h-80 rounded-2xl border overflow-hidden" />
+          <template #fallback>
+            <div class="h-80 rounded-2xl border grid place-items-center text-sm text-x-gray2">Loading map…</div>
+          </template>
+        </ClientOnly>
+
+        <div class="grid md:grid-cols-3 gap-3">
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Latitude</span>
+            <input
+              v-model="latStr"
+              :placeholder="draft.details.lat != null ? String(draft.details.lat) : 'e.g., 40.4168'"
+              class="w-full rounded-xl border px-3 py-2"
+            />
+          </label>
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Longitude</span>
+            <input
+              v-model="lngStr"
+              :placeholder="draft.details.lng != null ? String(draft.details.lng) : 'e.g., -3.7038'"
+              class="w-full rounded-xl border px-3 py-2"
+            />
+          </label>
+          <div class="self-end text-xs text-x-gray2">
+            <span v-if="draft.details.lat != null && draft.details.lng != null">
+              Selected: {{ draft.details.lat?.toFixed(6) }}, {{ draft.details.lng?.toFixed(6) }}
+            </span>
+            <span v-else>No location selected</span>
+          </div>
+        </div>
+
+        <label class="space-y-1">
+          <span class="text-xs text-x-gray2">Description</span>
+          <textarea v-model="draft.details.description" rows="4" class="w-full rounded-xl border px-3 py-2" />
+        </label>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Showing Instructions</span>
+            <input v-model="draft.details.showingInstructions" class="w-full rounded-xl border px-3 py-2" />
+          </label>
+          <label class="space-y-1">
+            <span class="text-xs text-x-gray2">Lead Contact Preference</span>
+            <select v-model="draft.details.leadContactPreference" class="w-full rounded-xl border px-3 py-2">
+              <option value="form">Form</option>
+              <option value="email">Email</option>
+              <option value="phone">Phone</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- STEP 1: Primary Photos -->
+      <section v-if="step === 1" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Primary photos — {{ media.primaryPhotos.length }}/{{ activeLimits.primaryPhotos }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone
+          label="Drop photos here or click to choose (JPG/PNG/WebP)"
+          accept="image/*"
+          multiple
+          @files="(fs) => addFiles('primaryPhotos', fs)"
+        />
+        <MediaList
+          :items="media.primaryPhotos"
+          primary-mode
+          @update:items="(v) => reorder('primaryPhotos', v)"
+          @primary="setPrimaryPhoto"
+          @remove="(id) => remove('primaryPhotos', id)"
+        />
+      </section>
+
+      <!-- STEP 2: Virtual Tours (URLs) -->
+      <section v-if="step === 2" class="space-y-2 card p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Virtual Tours — {{ media.virtualTours.length }}/{{ activeLimits.virtualTours }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <label class="space-y-1">
+          <span class="text-xs text-x-gray2">Add tour URL (Matterport, etc.)</span>
+          <div class="flex gap-2">
+            <input
+              v-model="tourUrl"
+              placeholder="https://my.matterport.com/..."
+              class="flex-1 rounded-xl border px-3 py-2"
+            />
+            <button
+              class="btn btn-primary"
+              @click="() => { if (tourUrl) { addUrl('virtualTours', tourUrl, 'virtualTour'); tourUrl = ''; } }"
+            >
+              Add
+            </button>
+          </div>
+        </label>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="t in media.virtualTours" :key="t.id" class="card overflow-hidden">
+            <div class="aspect-video">
+              <iframe v-if="t.url" :src="t.url" class="w-full h-full" allowfullscreen />
+            </div>
+            <div class="p-3 flex items-center justify-between text-sm">
+              <span class="truncate">{{ t.name }}</span>
+              <button class="underline" @click="remove('virtualTours', t.id)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Video -->
+      <section v-if="step === 3" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Videos — {{ media.videos.length }}/{{ activeLimits.videos }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone label="Upload videos (MP4/WebM)" accept="video/*" multiple @files="(fs) => addFiles('videos', fs)" />
+        <label class="space-y-1 card p-3">
+          <span class="text-xs text-x-gray2">Or add YouTube/Vimeo URL</span>
+          <div class="flex gap-2">
+            <input v-model="videoUrl" placeholder="https://youtu.be/..." class="flex-1 rounded-xl border px-3 py-2" />
+            <button
+              class="btn btn-primary"
+              @click="() => { if (videoUrl) { addUrl('videos', videoUrl, 'video'); videoUrl = ''; } }"
+            >
+              Add
+            </button>
+          </div>
+        </label>
+        <MediaList
+          :items="media.videos"
+          @update:items="(v) => reorder('videos', v)"
+          @remove="(id) => remove('videos', id)"
+        />
+      </section>
+
+      <!-- STEP 4: Drone -->
+      <section v-if="step === 4" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Drone — {{ media.drone.length }}/{{ activeLimits.drone }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone label="Drone photos/videos" accept="image/*,video/*" multiple @files="(fs) => addFiles('drone', fs)" />
+        <MediaList
+          :items="media.drone"
+          @update:items="(v) => reorder('drone', v)"
+          @remove="(id) => remove('drone', id)"
+        />
+      </section>
+
+      <!-- STEP 5: Floor Plans -->
+      <section v-if="step === 5" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Floor Plans — {{ media.floorPlans.length }}/{{ activeLimits.floorPlans }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone
+          label="Floor plans (PDF/JPG/PNG)"
+          accept="application/pdf,image/*"
+          multiple
+          @files="(fs) => addFiles('floorPlans', fs)"
+        />
+        <MediaList
+          :items="media.floorPlans"
+          @update:items="(v) => reorder('floorPlans', v)"
+          @remove="(id) => remove('floorPlans', id)"
+        />
+      </section>
+
+      <!-- STEP 6: Documents -->
+      <section v-if="step === 6" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Documents — {{ media.documents.length }}/{{ activeLimits.documents }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone label="Documents (PDF)" accept="application/pdf" multiple @files="(fs) => addFiles('documents', fs)" />
+        <MediaList
+          :items="media.documents"
+          @update:items="(v) => reorder('documents', v)"
+          @remove="(id) => remove('documents', id)"
+        />
+      </section>
+
+      <!-- STEP 7: Additional -->
+      <section v-if="step === 7" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-sm">
+            Additional — {{ media.additional.length }}/{{ activeLimits.additional }}
+          </p>
+          <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
+        </div>
+
+        <UploadZone
+          label="Additional media (brochures, photos)"
+          accept="image/*,application/pdf"
+          multiple
+          @files="(fs) => addFiles('additional', fs)"
+        />
+        <MediaList
+          :items="media.additional"
+          @update:items="(v) => reorder('additional', v)"
+          @remove="(id) => remove('additional', id)"
+        />
+      </section>
+
+      <!-- STEP 8: Review -->
+      <section v-if="step === 8" class="card p-4 space-y-3">
+        <h3 class="font-medium">Preview</h3>
+        <p class="text-sm text-x-gray2">
+          Use the JSON export for API testing or visit <code>/preview</code> for a print/PDF view.
+        </p>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost" @click="downloadJSON(`xplor_draft_${draftId}`, draft)">Export JSON</button>
+          <button class="btn btn-primary" :disabled="publishing" @click="publish">
+            <span v-if="publishing">Publishing…</span>
+            <span v-else>Publish</span>
+          </button>
+        </div>
+        <p v-if="publishError" class="text-sm text-red-600 mt-1">{{ publishError }}</p>
+      </section>
+
+      <!-- Wizard Nav -->
+      <div class="flex items-center justify-between pt-2">
+        <button class="btn btn-ghost" :disabled="step === 0" @click="goBack">Back</button>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost" @click="saveNow">Save Draft</button>
+          <button class="btn btn-alt" :disabled="step === steps.length - 1" @click="goNext">Next</button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>

@@ -1,26 +1,36 @@
 // composables/useSidebar.ts
-import { useState } from '#app'
+import { ref, watch } from 'vue'
 
-const STORAGE_KEY = 'xplor:sidebar:expanded'
+const _isOpen = ref(false)       // mobile drawer
+const _isCollapsed = ref(false)  // desktop collapsed
+let initialized = false
 
 export function useSidebar() {
-  // default: expanded on desktop, collapsed on mobile (SSR-safe guess)
-  const initial = process.client
-    ? (localStorage.getItem(STORAGE_KEY) ?? '1') === '1'
-    : true
+  if (import.meta.client && !initialized) {
+    initialized = true
 
-  const expanded = useState<boolean>('sidebar-expanded', () => initial)
-  const mobileOpen = useState<boolean>('sidebar-mobile-open', () => false)
+    // restore persisted state
+    try {
+      const stored = localStorage.getItem('xplor_sidebar_collapsed')
+      if (stored !== null) _isCollapsed.value = stored === '1'
+    } catch {}
 
-  function setExpanded(v: boolean) {
-    expanded.value = v
-    if (process.client) localStorage.setItem(STORAGE_KEY, v ? '1' : '0')
+    // optional query override: ?sidebar=collapsed|expanded
+    try {
+      const q = new URLSearchParams(location.search).get('sidebar')
+      if (q === 'collapsed') _isCollapsed.value = true
+      if (q === 'expanded')  _isCollapsed.value = false
+    } catch {}
+
+    // persist on change
+    watch(_isCollapsed, v => {
+      try { localStorage.setItem('xplor_sidebar_collapsed', v ? '1' : '0') } catch {}
+    })
   }
-  function toggleExpanded() { setExpanded(!expanded.value) }
 
-  function openMobile() { mobileOpen.value = true }
-  function closeMobile() { mobileOpen.value = false }
-  function toggleMobile() { mobileOpen.value = !mobileOpen.value }
+  const toggleMobile = () => { _isOpen.value = !_isOpen.value }
+  const closeMobile   = () => { _isOpen.value = false }
+  const toggleCollapsed = () => { _isCollapsed.value = !_isCollapsed.value }
 
-  return { expanded, setExpanded, toggleExpanded, mobileOpen, openMobile, closeMobile, toggleMobile }
+  return { isOpen: _isOpen, isCollapsed: _isCollapsed, toggleMobile, closeMobile, toggleCollapsed }
 }

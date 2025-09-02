@@ -25,4 +25,8 @@ const { data: media, error: e2 } = await useFetch(`/api/property-media?property_
       <div v-else class="text-gray-500">No media yet.</div>
     </template>
   </div>
+  <NuxtLink :to="`/spaces/${route.params.id}/request-access`" class="btn btn-ghost">
+  Request Access
+</NuxtLink>
+
 </template>

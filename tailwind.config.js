@@ -1,36 +1,46 @@
 ﻿/** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
-    "./components/**/*.{vue,js,ts}",
-    "./layouts/**/*.{vue,js,ts}",
-    "./pages/**/*.{vue,js,ts}",
-    "./plugins/**/*.{js,ts}",
-    "./app.vue",
-    "./error.vue",
+    './components/**/*.{vue,js,ts}',
+    './layouts/**/*.{vue,js,ts}',
+    './pages/**/*.{vue,js,ts}',
+    './plugins/**/*.{js,ts}',
+    './app.vue',
+    './error.vue',
   ],
   theme: {
     extend: {
       colors: {
+        // Your original nested palette
         x: {
-          yellow: "#E8F793",
-          black: "#121212",
-          deep: "#292D32",
-          gray: "#C1C2CE",
-          gray2: "#9899AC",
-          white: "#FFFFFF",
+          yellow: '#E8F793',
+          black: '#121212',
+          deep:  '#292D32',
+          gray:  '#C1C2CE',
+          gray2: '#9899AC',
+          white: '#FFFFFF',
         },
+        // Hyphenated aliases to match classes used in components (e.g. bg-xplor-yellow)
+        'xplor-yellow': '#E8F793',
+        'xplor-black':  '#121212',
+        'xplor-deep':   '#292D32',
+        'xplor-gray':   '#C1C2CE',
+        'xplor-gray2':  '#9899AC',
       },
       fontFamily: {
         // body / UI font
-        sans: ["Satoshi", "Inter", "system-ui", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
-        // for logo/brand lockup; use sparingly in headings if desired
-        display: ["Satoshi", "Inter", "system-ui", "sans-serif"],
+        sans: ['Satoshi', 'Inter', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        // headings/logo if you like
+        display: ['Satoshi', 'Inter', 'system-ui', 'sans-serif'],
+        // BRAND font for <BrandXplor/> and anywhere else you want it
+        brand: ['Typografix', 'Satoshi', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        soft: "0 6px 24px rgba(0,0,0,0.06)",
+        soft: '0 6px 24px rgba(0,0,0,0.06)',
       },
       borderRadius: {
-        xl2: "1rem",
+        xl2: '1rem',
       },
     },
   },

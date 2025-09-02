@@ -1,7 +1,23 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html, body, #__nuxt {
+    @apply bg-black text-white min-h-screen;
+  }
+  ::selection { @apply bg-white/20 text-white; }
+}
+
+@layer utilities {
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.25) transparent;
+  }
+  .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .thin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22); border-radius: 8px; }
+  .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+}
 /* ---------- Fonts ---------- */
 @font-face {
   font-family: "Satoshi";
@@ -29,7 +45,9 @@
 
 /* ---------- Reusable UI tokens ---------- */
 @layer components {
-  .container-x { @apply max-w-6xl mx-auto px-4; }
+  .container-x {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl;
+  }
 
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-transparent
@@ -62,8 +80,15 @@
     @apply text-x-black bg-x-yellow/70;
   }
 
-  .brand-xplor { @apply font-display; }
+  .brand-xplor {
+    @apply font-brand tracking-tight;       /* uses the Typografix family */
+    letter-spacing: -0.01em;                /* tiny optical tighten */
+  }
+  .brand-glow {
+    text-shadow: 0 0 16px rgba(232,247,147,0.2);
 }
 
 /* ---------- Map container helper ---------- */
 .map-block { @apply h-[420px] w-full rounded-xl overflow-hidden bg-white; }
+}
+

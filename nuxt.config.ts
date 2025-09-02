@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   components: [{ path: '~/components', pathPrefix: false }],
 
   // Tailwind + PostCSS (keep PostCSS here; remove postcss.config.js)
-  css: ['~/assets/css/tailwind.css'],
+  css: ['~/assets/css/tailwind.css', '~/assets/css/fonts.css'],
   postcss: { plugins: { tailwindcss: {}, autoprefixer: {} } },
 
 
@@ -61,7 +61,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Xplor',
-      meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+      htmlAttrs: { class: 'dark bg-black' },          // <- dark by default
+      bodyAttrs: { class: 'bg-black text-white' },    // <- global text/bg
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'theme-color', content: '#000000' },  // <- mobile address bar
+      ],
     },
   },
 })
