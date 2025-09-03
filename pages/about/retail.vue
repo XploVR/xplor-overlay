@@ -1,4 +1,4 @@
-﻿<!-- pages/about/retail.vue -->
+<!-- pages/about/retail.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
@@ -7,12 +7,12 @@ import { useHead } from '#imports'
 import heroRetail from '@/assets/images/heroretail.jpg'
 
 useHead({
-  title: 'Retail on Xplor Immersive Stores, Pop-ups & Showrooms',
+  title: 'Retail on xplor Immersive Stores, Pop-ups & Showrooms',
   meta: [
     {
       name: 'description',
       content:
-        'Turn every store into a shoppable destination. Xplor helps retailers showcase immersive 360°/3D tours, drive footfall, capture leads, and measure engagement.'
+        'Turn every store into a shoppable destination. xplor helps retailers showcase immersive 360°/3D tours, drive footfall, capture leads, and measure engagement.'
     }
   ]
 })
@@ -23,7 +23,7 @@ useHead({
     <!-- HERO -->
     <section class="relative overflow-hidden">
       <div
-        class="absolute inset-0 opacity-45 bg-cover bg-center"
+        class="absolute inset-0 opacity-100 bg-cover bg-center"
         :style="{ backgroundImage: `url(${heroRetail})` }"
       ></div>
 <div
@@ -38,7 +38,7 @@ useHead({
             Retail that customers can step into from anywhere.
           </h1>
           <p class="mt-4 text-lg text-white/80">
-            Xplor transforms stores, pop-ups, and showrooms into immersive, always-open experiences.
+            xplor transforms stores, pop-ups, and showrooms into immersive, always-open experiences.
             Let shoppers browse layouts, discover products, and take action before they ever walk in.
           </p>
           <div class="mt-8 flex flex-wrap gap-3">
@@ -59,13 +59,13 @@ useHead({
       </div>
     </section>
 
-    <!-- WHY RETAIL ON XPLOR -->
+    <!-- WHY RETAIL ON xplor -->
     <section class="container-x py-14 md:py-16">
       <h2 class="text-3xl font-semibold tracking-tight text-center">
-        Why your retail space belongs on Xplor
+        Why your retail space belongs on xplor
       </h2>
       <p class="mt-3 text-center text-white/70 max-w-3xl mx-auto">
-        Visual merchandising matters. With Xplor, every store visit can start online â€” increasing
+        Visual merchandising matters. With xplor, every store visit can start online increasing
         discovery, intent, and in-store conversions while giving you clear analytics and control.
       </p>
 
@@ -103,7 +103,7 @@ useHead({
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
           <div class="text-lg font-medium">Privacy & control</div>
           <p class="text-sm text-white/70 mt-1">
-            Public, Private, or PIN â€” share with partners or press before you go live.
+            Public, Private, or PIN share with partners or press before you go live.
           </p>
         </div>
 
@@ -134,9 +134,9 @@ useHead({
             <div class="text-xs px-2 py-1 rounded-lg bg-white/10 border border-white/10 inline-block">
               Featured Retail Tour
             </div>
-            <h3 class="mt-3 text-2xl font-semibold">Flagship Store â€” Immersive Walkthrough</h3>
+            <h3 class="mt-3 text-2xl font-semibold">Flagship Store Immersive Walkthrough</h3>
             <p class="mt-2 text-white/80">
-              Explore the floor set, discover highlighted products, and preview the in-store experience.
+              xplor the floor set, discover highlighted products, and preview the in-store experience.
               Hotspots link to PDPs and promos to drive both ecommerce and footfall.
             </p>
 
@@ -151,7 +151,7 @@ useHead({
                 to="/spaces?type=retail"
                 class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90"
               >
-                Explore Retail Spaces
+                xplor Retail Spaces
               </NuxtLink>
               <NuxtLink
                 to="/upload?type=retail"
@@ -195,7 +195,7 @@ useHead({
       <div class="rounded-3xl border border-white/10 bg-[radial-gradient(60%_60%_at_30%_20%,rgba(232,247,147,0.12),transparent)] p-6 md:p-10">
         <div class="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 class="text-3xl font-semibold tracking-tight">Built for now â€” ready for whatâ€™s next</h2>
+            <h2 class="text-3xl font-semibold tracking-tight">Built for now ready for whatâ€™s next</h2>
             <p class="mt-3 text-white/80">
               Xplorâ€™s geospatial index makes your location discoverable today, while our open approach to
               tour formats keeps you future-proof. Whether youâ€™re rolling regional pop-ups or opening
@@ -243,7 +243,7 @@ useHead({
       <div class="container-x text-center">
         <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Put your store on the map</h2>
         <p class="mt-3 text-white/80">
-          If it can be walked through, it can be explored on Xplor.
+          If it can be walked through, it can be explored on xplor.
         </p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <NuxtLink

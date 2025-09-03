@@ -1,4 +1,4 @@
-﻿<!-- pages/fairseas.vue -->
+<!-- pages/fairseas.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-next'
@@ -15,7 +15,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
         </h1>
         <p class="mt-4 text-lg text-white/80 max-w-3xl mx-auto">
           The worldâ€™s first brokerage model that shares
-          <strong>50% of charter commission with the crew</strong> â€” because crew are the ones who make
+          <strong>50% of charter commission with the crew</strong> because crew are the ones who make
           every charter unforgettable.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
@@ -37,7 +37,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
           <p class="mt-3 text-white/80">
             FairSeas is simple: we give <strong>half of our charter commission directly to the crew</strong>.
             When Xplor is central agent, that means <strong>double the payout</strong> compared to a standard
-            brokerage model. No smoke and mirrors â€” transparent, fair, crew-first.
+            brokerage model. No smoke and mirrors transparent, fair, crew-first.
           </p>
           <ul class="mt-6 space-y-2 text-sm text-white/70">
             <li>â€¢ 50% of Xplorâ€™s commission shared with the crew</li>
@@ -59,7 +59,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
         <h2 class="text-3xl font-semibold tracking-tight text-center">FairSeas Ratings System</h2>
         <p class="mt-3 text-center text-white/80 max-w-2xl mx-auto">
           Tips arenâ€™t always fair. Thatâ€™s why weâ€™re introducing an optional
-          <strong>Crew Rating Index (CRI+)</strong> â€” an objective way to divide
+          <strong>Crew Rating Index (CRI+)</strong> an objective way to divide
           onboard commission bonuses.
         </p>
 
@@ -130,7 +130,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
       <div class="container-x text-center">
         <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">The industry needs a revolution</h2>
         <p class="mt-3 text-white/80 max-w-3xl mx-auto">
-          FairSeas is built for the people who matter most â€” the crew.  
+          FairSeas is built for the people who matter most the crew.  
           You are the heart of yachting. You make every trip possible.  
           Now, you finally share in the rewards.
         </p>

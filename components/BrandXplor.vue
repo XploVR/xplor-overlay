@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<{
   glow?: boolean
 }>(), {
   as: 'span',
-  label: 'Xplor',
+  label: 'xplor',
   size: 'md',
   mark: false,
   glow: false,
@@ -44,7 +44,7 @@ const sizeClass = computed(() => {
       'inline-flex items-center gap-2 align-baseline',
       glow && 'brand-glow'
     ]"
-    aria-label="Xplor"
+    aria-label="xplor"
   >
     <span
       v-if="mark"

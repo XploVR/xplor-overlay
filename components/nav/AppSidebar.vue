@@ -1,4 +1,4 @@
-<!-- components/nav/AppSidebar.vue -->
+ below is my AppSidebar, please could you add space at the bottom so that all sidebars buttons can be viewed in any zoom % when scrolling to the bottom with scrollbar <!-- components/nav/AppSidebar.vue -->  
 <script setup lang="ts">
 import { h, computed } from 'vue'
 import { useRoute } from 'vue-router'

@@ -1,9 +1,9 @@
 ﻿<script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import { useHead } from '#imports'
-// import heroYachts from '@/assets/images/yachts-hero.jpg'
+import heroYachts from '@/assets/images/yachts/superyachts/yacht-006.jpg'
 useHead({
-  title: 'Yachts on Xplor — Sales, Charters & FairSeas',
+  title: 'Yachts on xplor — Sales, Charters & FairSeas',
   meta: [{ name: 'description', content: 'Showcase yachts with immersive tours, capture enquiries, and align incentives with FairSeas.' }]
 })
 </script>
@@ -11,11 +11,11 @@ useHead({
 <template>
   <div class="min-h-dvh bg-black text-white">
     <section class="relative overflow-hidden">
-      <!-- <div class="absolute inset-0 opacity-45 bg-cover bg-center" :style="{ backgroundImage: `url(${heroYachts})` }" ></div>
+      <div class="absolute inset-0 opacity-100 bg-cover bg-center" :style="{ backgroundImage: `url(${heroYachts})` }" ></div>
 <div
   class="absolute inset-0 pointer-events-none z-[10]
          [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
-</div> -->
+</div>
       <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" ></div>
       <div class="relative container-x py-16 md:py-24">
         <div class="max-w-3xl">
@@ -31,8 +31,8 @@ useHead({
     </section>
 
     <section class="container-x py-14 md:py-16">
-      <h2 class="text-3xl font-semibold tracking-tight text-center">Why list your yacht on Xplor</h2>
-      <p class="mt-3 text-center text-white/70 max-w-3xl mx-auto">Let buyers and charterers explore deck-by-deck. Convert curiosity into qualified enquiries.</p>
+      <h2 class="text-3xl font-semibold tracking-tight text-center">Why list your yacht on xplor</h2>
+      <p class="mt-3 text-center text-white/70 max-w-3xl mx-auto">Let buyers and charterers xplor deck-by-deck. Convert curiosity into qualified enquiries.</p>
       <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5"><div class="text-lg font-medium">360°/3D tours</div><p class="text-sm text-white/70 mt-1">Matterport, 3DVista, Kuula or custom.</p></div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5"><div class="text-lg font-medium">Lead capture</div><p class="text-sm text-white/70 mt-1">Forms, WhatsApp, broker email routing.</p></div>
@@ -55,7 +55,7 @@ useHead({
             <p class="mt-2 text-white/80">Sundeck, salon, staterooms, crew areas — with hotspots to specs and enquiry.</p>
             <ul class="mt-4 space-y-1 text-sm text-white/70"><li>• Deck-by-deck navigation</li><li>• Hotspots to PDF/specs</li><li>• UTM-tracked links</li></ul>
             <div class="mt-6 flex flex-wrap gap-3">
-              <NuxtLink to="/spaces?type=yachts" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">Explore Yachts</NuxtLink>
+              <NuxtLink to="/spaces?type=yachts" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">xplor Yachts</NuxtLink>
               <NuxtLink to="/upload?type=yachts" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Upload Your Yacht</NuxtLink>
             </div>
           </div>
@@ -66,7 +66,7 @@ useHead({
     <section class="py-16 md:py-20 bg-[radial-gradient(80%_80%_at_50%_10%,rgba(232,247,147,0.12),transparent)]">
       <div class="container-x text-center">
         <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Ready to list?</h2>
-        <p class="mt-3 text-white/80">If it can be walked through, it can be explored on Xplor.</p>
+        <p class="mt-3 text-white/80">If it can be walked through, it can be explored on xplor.</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <NuxtLink to="/upload?type=yachts" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">Upload a Yacht</NuxtLink>
           <NuxtLink to="/contact" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Contact Sales</NuxtLink>

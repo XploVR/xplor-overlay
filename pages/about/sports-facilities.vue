@@ -1,9 +1,9 @@
 ﻿<script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import { useHead } from '#imports'
-// import heroSports from '@/assets/images/sports-hero.jpg'
+import heroSports from '@/assets/images/sports/sports-002.jpg'
 useHead({
-  title: 'Sports Facilities on Xplor — Stadiums, Clubs & Complexes',
+  title: 'Sports Facilities on xplor — Stadiums, Clubs & Complexes',
   meta: [{ name: 'description', content: 'Tour stadiums, clubs, and training centres online. Drive memberships, bookings, and events.' }]
 })
 </script>
@@ -11,15 +11,15 @@ useHead({
 <template>
   <div class="min-h-dvh bg-black text-white">
     <section class="relative overflow-hidden">
-      <!-- <div class="absolute inset-0 opacity-45 bg-cover bg-center" :style="{ backgroundImage: `url(${heroSports})` }" ></div>
-<div
-  class="absolute inset-0 pointer-events-none z-[10]
-         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
-</div> -->
+      <div class="absolute inset-0 opacity-100 bg-cover bg-center" :style="{ backgroundImage: `url(${heroSports})` }" ></div>
+      <div
+        class="absolute inset-0 pointer-events-none z-[10]
+               [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
+      </div>
       <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" ></div>
       <div class="relative container-x py-16 md:py-24">
         <div class="max-w-3xl">
-          <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">Let fans and members explore your venue.</h1>
+          <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">Let fans and members xplor your venue.</h1>
           <p class="mt-4 text-lg text-white/80">Showcase hospitality suites, training areas, courts, and arenas — then route to bookings and memberships.</p>
           <div class="mt-8 flex flex-wrap gap-3">
             <NuxtLink to="/upload?type=sports" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">Upload a Sports Facility</NuxtLink>
@@ -30,7 +30,7 @@ useHead({
     </section>
 
     <section class="container-x py-14 md:py-16">
-      <h2 class="text-3xl font-semibold tracking-tight text-center">Why sports venues choose Xplor</h2>
+      <h2 class="text-3xl font-semibold tracking-tight text-center">Why sports venues choose xplor</h2>
       <p class="mt-3 text-center text-white/70 max-w-3xl mx-auto">Elevate sales, events, and recruitment with immersive previews.</p>
       <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5"><div class="text-lg font-medium">Hospitality & boxes</div><p class="text-sm text-white/70 mt-1">Sell suites with accurate previews.</p></div>
@@ -54,7 +54,7 @@ useHead({
             <p class="mt-2 text-white/80">Memberships, suites, events — all with accurate previews and clear CTAs.</p>
             <ul class="mt-4 space-y-1 text-sm text-white/70"><li>• Hospitality & seating previews</li><li>• Venue hire CTAs</li><li>• UTM tracked links</li></ul>
             <div class="mt-6 flex flex-wrap gap-3">
-              <NuxtLink to="/spaces?type=sports" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">Explore Sports Venues</NuxtLink>
+              <NuxtLink to="/spaces?type=sports" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">xplor Sports Venues</NuxtLink>
               <NuxtLink to="/upload?type=sports" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Upload a Facility</NuxtLink>
             </div>
           </div>
@@ -65,7 +65,7 @@ useHead({
     <section class="py-16 md:py-20 bg-[radial-gradient(80%_80%_at_50%_10%,rgba(232,247,147,0.12),transparent)]">
       <div class="container-x text-center">
         <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Turn visits into bookings</h2>
-        <p class="mt-3 text-white/80">If it can be walked through, it can be explored on Xplor.</p>
+        <p class="mt-3 text-white/80">If it can be walked through, it can be explored on xplor.</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <NuxtLink to="/upload?type=sports" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">Start a Sports Upload</NuxtLink>
           <NuxtLink to="/contact" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Contact Sales</NuxtLink>

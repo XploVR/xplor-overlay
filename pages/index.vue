@@ -1,4 +1,4 @@
-﻿<!-- pages/index.vue -->
+<!-- pages/index.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import landingHero from '@/assets/images/landing-hero.jpg'
@@ -34,7 +34,7 @@ import landingHero from '@/assets/images/landing-hero.jpg'
               In Real Time.
             </h1>
             <p class="mt-4 text-lg text-white/80">
-              Xplor.io is a universal platform for immersive tours â€” real estate, yachts, galleries,
+              xplor.io is a universal platform for immersive tours real estate, yachts, galleries,
               resorts, cities, and beyond.
             </p>
 
@@ -52,7 +52,7 @@ import landingHero from '@/assets/images/landing-hero.jpg'
     </div>
   </section>
 
-  <!-- WHAT IS XPLOR -->
+  <!-- WHAT IS xplor -->
   <section id="what" class="py-10 md:py-14">
     <div class="grid md:grid-cols-2 gap-8 items-center">
       <div class="rounded-2xl border border-white/10 bg-white/[0.04] aspect-[4/3] flex items-center justify-center">
@@ -62,21 +62,21 @@ import landingHero from '@/assets/images/landing-hero.jpg'
       </div>
 
       <div>
-        <h2 class="text-3xl font-semibold tracking-tight">What is Xplor?</h2>
+        <h2 class="text-3xl font-semibold tracking-tight">What is xplor?</h2>
         <p class="mt-3 text-white/70">
-          Xplor.io lets you publish and discover immersive spaces. Upload 360Â° or 3D tours
+          xplor.io lets you publish and discover immersive spaces. Upload 360Â° or 3D tours
           (Matterport, 3DVista, Kuula, custom), geotag them on an interactive Mapbox map,
-          and share or embed everywhere â€” no app required.
+          and share or embed everywhere no app required.
         </p>
         <ul class="mt-6 space-y-2 text-sm text-white/60">
-          <li>â€¢ Universal tour support (360Â°, 3D, video, galleries)</li>
-          <li>â€¢ Geospatial search & global discovery</li>
-          <li>â€¢ Clean embeds for websites & listings</li>
-          <li>â€¢ Built with Supabase, Mapbox, Nuxt</li>
+          <li> Universal tour support (360°, 3D, video, galleries)</li>
+          <li> Geospatial search & global discovery</li>
+          <li> Clean embeds for websites & listings</li>
+          <li> Built with Supabase, Mapbox, Nuxt</li>
         </ul>
         <div class="mt-6">
           <NuxtLink to="/spaces" class="px-4 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90">
-            Explore spaces
+            xplor spaces
           </NuxtLink>
         </div>
       </div>
@@ -86,18 +86,18 @@ import landingHero from '@/assets/images/landing-hero.jpg'
   <!-- VERTICALS -->
   <section id="verticals" class="py-10 md:py-14">
     <h2 class="text-3xl font-semibold tracking-tight">Key Verticals</h2>
-    <p class="mt-2 text-white/70">From luxury rentals to cultural venues â€” Xplor is built for every kind of space.</p>
+    <p class="mt-2 text-white/70">From luxury rentals to cultural venues xplor is built for every kind of space.</p>
 
     <div class="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4">
-      <NuxtLink to="/upload?type=real_estate"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸ¡ Real Estate</div><p class="text-sm text-white/70 mt-1">Homes, villas, offices</p></NuxtLink>
-      <NuxtLink to="/upload?type=developments"  class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸ—ï¸ Developments</div><p class="text-sm text-white/70 mt-1">New builds & masterplans</p></NuxtLink>
-      <NuxtLink to="/upload?type=yachts"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸ›¥ï¸ Yachts</div><p class="text-sm text-white/70 mt-1">Charter & sales</p></NuxtLink>
-      <NuxtLink to="/upload?type=hospitality"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸ¨ Hospitality</div><p class="text-sm text-white/70 mt-1">Hotels & resorts</p></NuxtLink>
-      <NuxtLink to="/upload?type=galleries"     class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸŽ¨ Galleries</div><p class="text-sm text-white/70 mt-1">Museums & studios</p></NuxtLink>
-      <NuxtLink to="/upload?type=automotive"    class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸš— Automotive</div><p class="text-sm text-white/70 mt-1">Showrooms & events</p></NuxtLink>
-      <NuxtLink to="/upload?type=aviation"      class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">âœˆï¸ Aviation</div><p class="text-sm text-white/70 mt-1">Jets & terminals</p></NuxtLink>
-      <NuxtLink to="/upload?type=sports"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸŸï¸ Sports Facilities</div><p class="text-sm text-white/70 mt-1">Clubs & complexes</p></NuxtLink>
-      <NuxtLink to="/upload?type=retail"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium">ðŸ›ï¸ Retail</div><p class="text-sm text-white/70 mt-1">Stores & pop-ups</p></NuxtLink>
+      <NuxtLink to="/upload?type=real_estate"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Real Estate</div><p class="text-sm text-white/70 mt-1">Homes, villas, offices</p></NuxtLink>
+      <NuxtLink to="/upload?type=developments"  class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Developments</div><p class="text-sm text-white/70 mt-1">New builds & masterplans</p></NuxtLink>
+      <NuxtLink to="/upload?type=yachts"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Yachts</div><p class="text-sm text-white/70 mt-1">Charter & sales</p></NuxtLink>
+      <NuxtLink to="/upload?type=hospitality"   class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Hospitality</div><p class="text-sm text-white/70 mt-1">Hotels & resorts</p></NuxtLink>
+      <NuxtLink to="/upload?type=galleries"     class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Galleries</div><p class="text-sm text-white/70 mt-1">Museums & studios</p></NuxtLink>
+      <NuxtLink to="/upload?type=automotive"    class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Automotive</div><p class="text-sm text-white/70 mt-1">Showrooms & events</p></NuxtLink>
+      <NuxtLink to="/upload?type=aviation"      class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Aviation</div><p class="text-sm text-white/70 mt-1">Jets & terminals</p></NuxtLink>
+      <NuxtLink to="/upload?type=sports"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Sports Facilities</div><p class="text-sm text-white/70 mt-1">Clubs & complexes</p></NuxtLink>
+      <NuxtLink to="/upload?type=retail"        class="rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.08] transition"><div class="text-lg font-medium"> Retail</div><p class="text-sm text-white/70 mt-1">Stores & pop-ups</p></NuxtLink>
     </div>
   </section>
 
@@ -106,15 +106,15 @@ import landingHero from '@/assets/images/landing-hero.jpg'
     <div class="rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] p-6 md:p-10">
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
-          <h2 class="text-3xl font-semibold tracking-tight">FairSeas by Xplor</h2>
+          <h2 class="text-3xl font-semibold tracking-tight">FairSeas by xplor</h2>
           <p class="mt-3 text-white/70">
             FairSeas is our next-gen yacht brokerage model: we share <strong>50% of net charter commission with the crew</strong>.
-            Happy crew â†’ better service â†’ repeat charters.
+            Happy crew → better service → repeat charters.
           </p>
           <ul class="mt-6 space-y-2 text-sm text-white/60">
-            <li>â€¢ Transparent commission-sharing (crew-first)</li>
-            <li>â€¢ CRI+ (Crew Rating Index) for measurable quality</li>
-            <li>â€¢ Owners see higher guest satisfaction & utilization</li>
+            <li>• Transparent commission-sharing (crew-first)</li>
+            <li>• CRI+ (Crew Rating Index) for measurable quality</li>
+            <li>• Owners see higher guest satisfaction & utilization</li>
           </ul>
           <div class="mt-6 flex gap-3">
             <NuxtLink to="/fairseas" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
@@ -146,7 +146,7 @@ import landingHero from '@/assets/images/landing-hero.jpg'
       </div>
       <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
         <div class="text-xl font-medium">2) Get discovered</div>
-        <p class="text-sm text-white/70 mt-1">Your listing appears on the global Xplor map and in search.</p>
+        <p class="text-sm text-white/70 mt-1">Your listing appears on the global xplor map and in search.</p>
       </div>
       <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
         <div class="text-xl font-medium">3) Share & monetize</div>

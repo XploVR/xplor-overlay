@@ -209,7 +209,7 @@ const filtered = computed(() => {
   <div class="container-x py-8 space-y-8">
     <!-- Hero / Search -->
     <section class="space-y-3">
-      <h1 class="font-display text-2xl md:text-3xl tracking-tight">Explore Spaces</h1>
+      <h1 class="font-display text-2xl md:text-3xl tracking-tight">xplor Spaces</h1>
       <p class="text-sm text-x-deep/70">Search the latest virtual tours and listings on the map or in the grid.</p>
       <div class="flex gap-2">
         <input
