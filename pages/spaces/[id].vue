@@ -1,9 +1,22 @@
 ﻿<script setup lang="ts">
-const route = useRoute()
-const id = route.params.id as string
+import { ref, onMounted } from "vue"
+import { useRoute } from "vue-router"
 
-const { data: item, error: e1 }  = await useFetch(`/api/properties/${id}`, { server: true })
-const { data: media, error: e2 } = await useFetch(`/api/property-media?property_id=${id}`, { server: true })
+type Item = { id: string; title: string; description?: string; image?: string | null }
+const route = useRoute()
+const id = String(route.params.id || "")
+const item = ref<Item | null>(null)
+const e1 = ref<string | null>(null)
+
+onMounted(async () => {
+  try {
+    const urls = [`/api/spaces/${id}`, `/api/properties/${id}`]
+    let res: any = null
+    for (const u of urls) { try { res = await $fetch(u); if (res) break } catch {} }
+    if (!res) res = { id, title: "Demo Space", description: "This is a demo detail view." }
+    item.value = { id: String(res.id ?? id), title: String(res.title ?? res.name ?? "Untitled"), description: res.description ?? "", image: res.image ?? res.cover ?? null }
+  } catch (err: any) { e1.value = err?.message || "Failed to load" }
+})
 </script>
 
 <template>
@@ -11,22 +24,16 @@ const { data: media, error: e2 } = await useFetch(`/api/property-media?property_
     <div v-if="e1">Not found.</div>
     <template v-else-if="item">
       <h1 class="text-2xl font-semibold">{{ item.title }}</h1>
-      <p class="text-gray-600">{{ item.description }}</p>
-
-      <div class="text-sm text-gray-500">
-        {{ item.address_line1 }} <span v-if="item.address_line1 && (item.city || item.country)"> · </span>
-        {{ item.city }} <span v-if="item.city && item.country"> · </span>
-        {{ item.country }}
+      <p class="text-white/70">{{ item.description }}</p>
+      <div v-if="item.image" class="rounded-2xl border overflow-hidden">
+        <img :src="item.image" alt="" class="w-full h-auto" />
       </div>
-
-      <div v-if="media?.length" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <img v-for="m in media" :key="m.id" :src="m.url" class="w-full h-48 object-cover rounded" />
-      </div>
-      <div v-else class="text-gray-500">No media yet.</div>
+    </template>
+    <template v-else>
+      <p class="text-sm text-white/60">Loading…</p>
     </template>
   </div>
-  <NuxtLink :to="`/spaces/${route.params.id}/request-access`" class="btn btn-ghost">
-  Request Access
-</NuxtLink>
-
 </template>
+
+<style scoped>
+</style>

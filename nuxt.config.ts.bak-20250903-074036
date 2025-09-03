@@ -7,39 +7,44 @@ export default defineNuxtConfig({
 
   components: [{ path: '~/components', pathPrefix: false }],
 
+  // Tailwind + PostCSS
   css: ['~/assets/css/tailwind.css', '~/assets/css/fonts.css'],
   postcss: { plugins: { tailwindcss: {}, autoprefixer: {} } },
 
+  // Runtime config
   runtimeConfig: {
     public: {
       mapboxToken: process.env.MAPBOX_TOKEN || '',
-      requireAuth: false,
-      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
-      supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+      requireAuth: false, // keep OFF during dev if you want the page to render signed-out
     },
   },
 
+  // ✅ Use the official Nuxt Supabase module
   modules: ['@nuxtjs/supabase'],
 
+  // Nuxt Supabase module config (reads from here OR from .env automatically)
+  // Prefer setting these env vars in .env:
+  //   NUXT_PUBLIC_SUPABASE_URL=...
+  //   NUXT_PUBLIC_SUPABASE_ANON_KEY=...
+  // If you want to be explicit, uncomment url/key below.
   supabase: {
-    url: process.env.NUXT_PUBLIC_SUPABASE_URL,
-    key: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
-    redirect: false,
-    cookieOptions: { sameSite: 'lax' },
-    clientOptions: {
-      auth: {
-        flowType: 'pkce',
-        detectSessionInUrl: true,
-        persistSession: true,
-        autoRefreshToken: true,
-      },
+    // url: process.env.NUXT_PUBLIC_SUPABASE_URL,
+    // key: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+    redirect: false, // don't auto-redirect on protected routes
+    cookieOptions: {
+      sameSite: 'lax',
     },
   },
 
+  // ❌ Remove mock aliasing so real auth works
   nitro: {
-    storage: { data: { driver: 'fs', base: '.data' } },
+    storage: {
+      data: { driver: 'fs', base: '.data' },
+    },
+    // No '#supabase/server' alias here anymore
   },
 
+  // Vite alias (keep project aliases only)
   vite: {
     resolve: {
       alias: {
@@ -47,7 +52,9 @@ export default defineNuxtConfig({
         '@': fileURLToPath(new URL('./', import.meta.url)),
       },
     },
-    server: { fs: { strict: false } },
+    server: {
+      fs: { strict: false },
+    },
   },
 
   typescript: {
@@ -69,7 +76,9 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#000000' },
       ],
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
     },
   },
 })

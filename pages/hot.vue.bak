@@ -1,7 +1,6 @@
 ﻿<!-- pages/hot.vue -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRuntimeConfig } from 'nuxt/app'
 
 type Space = {
   id: string
@@ -22,23 +21,7 @@ const loadErr = ref<string | null>(null)
 
 const mapEl = ref<HTMLElement | null>(null)
 let map: any = null
-let mapboxgl: any = null
-
-// --- runtime config (env) ---
-const cfg = useRuntimeConfig()
-const PUB = (cfg?.public || {}) as Record<string, any>
-const MAPBOX_TOKEN =
-  PUB.MAPBOX_TOKEN ||
-  PUB.MAPBOX_ACCESS_TOKEN ||
-  PUB.NUXT_PUBLIC_MAPBOX_TOKEN ||
-  PUB.NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN ||
-  ''
-const MAPBOX_STYLE =
-  PUB.MAPBOX_STYLE ||
-  PUB.MAPBOX_STYLE_URL ||
-  PUB.NUXT_PUBLIC_MAPBOX_STYLE ||
-  PUB.NUXT_PUBLIC_MAPBOX_STYLE_URL ||
-  'mapbox://styles/mapbox/streets-v12'
+let maplibregl: any = null
 
 const placeholderImg =
   'data:image/svg+xml;utf8,' +
@@ -111,50 +94,40 @@ onMounted(async () => {
 async function initMap () {
   if (!mapEl.value || map) return
 
-  // Ensure CSS first (works for both ESM and CDN loads)
-  await ensureMapboxCss()
-
-  // Load Mapbox GL (ESM first, CDN fallback)
   try {
-    const mod = await import('mapbox-gl')
-    // ESM default export holds the constructor
-    mapboxgl = (mod as any).default || mod
+    maplibregl = await import('maplibre-gl')
+    await ensureMapLibreCss()
   } catch {
-    await injectScript('https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js', 'mapbox-gl-js')
-    mapboxgl = (window as any).mapboxgl
+    await injectScript('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js', 'maplibre-gl-js')
+    await injectCss('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css', 'maplibre-gl-css')
+    maplibregl = (window as any).maplibregl
   }
+  if (!maplibregl) return
 
-  if (!mapboxgl) return
-  if (!MAPBOX_TOKEN) {
-    loadErr.value = 'Missing Mapbox token (set NUXT_PUBLIC_MAPBOX_TOKEN in .env)'
-    return
-  }
-
-  mapboxgl.accessToken = MAPBOX_TOKEN
-  map = new mapboxgl.Map({
+  map = new maplibregl.Map({
     container: mapEl.value,
-    style: MAPBOX_STYLE,
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
     center: [-3.7038, 40.4168], // Madrid
     zoom: 2.5,
     attributionControl: true,
   })
-  map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right')
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
 }
 
 function addMarkers () {
-  if (!map || !mapboxgl) return
+  if (!map || !maplibregl) return
   const pts = spaces.value.filter(s => isFinite(Number(s.lng)) && isFinite(Number(s.lat)))
   if (!pts.length) return
 
-  const bounds = new mapboxgl.LngLatBounds()
+  const bounds = new maplibregl.LngLatBounds()
   pts.forEach((s) => {
     const el = document.createElement('div')
     el.className = 'marker'
     el.style.cssText = 'width:12px;height:12px;border-radius:9999px;background:#111;box-shadow:0 0 0 2px #fff;'
-    new mapboxgl.Marker({ element: el })
+    new maplibregl.Marker({ element: el })
       .setLngLat([Number(s.lng), Number(s.lat)])
       .setPopup(
-        new mapboxgl.Popup({ offset: 12 }).setHTML(
+        new maplibregl.Popup({ offset: 12 }).setHTML(
           `<div style="font-family:system-ui,ui-sans-serif,sans-serif;font-size:12px;">
             <strong>${escapeHtml(s.title)}</strong><br/>
             ${[s.city, s.country].filter(Boolean).join(', ')}
@@ -172,7 +145,6 @@ function escapeHtml (str?: string) {
   return (str || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c] as string))
 }
 
-// --- tiny loaders ---
 function injectScript (src: string, id: string) {
   return new Promise<void>((resolve, reject) => {
     if (document.getElementById(id)) return resolve()
@@ -189,11 +161,11 @@ function injectCss (href: string, id: string) {
     document.head.appendChild(l)
   })
 }
-async function ensureMapboxCss () {
-  await injectCss('https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css', 'mapbox-gl-css')
+async function ensureMapLibreCss () {
+  if (document.getElementById('maplibre-gl-css')) return
+  await injectCss('https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css', 'maplibre-gl-css')
 }
 
-// --- filtering ---
 const filtered = computed(() => {
   const term = q.value.trim().toLowerCase()
   if (!term) return spaces.value
@@ -284,3 +256,4 @@ const filtered = computed(() => {
 <style scoped>
 .marker { cursor: pointer; }
 </style>
+

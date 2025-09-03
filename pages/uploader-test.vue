@@ -1,4 +1,4 @@
-<!-- pages/uploader-test.vue -->
+﻿<!-- pages/uploader-test.vue -->
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 
@@ -35,7 +35,7 @@ function onErr(err: unknown) {
         <Uploadform />
       </ClientOnly>
 
-      <!-- If the component or its imports throw, you’ll see it here -->
+      <!-- If the component or its imports throw, you'll see it here -->
       <template #error="{ error }">
         <div class="mt-6 rounded-lg border p-4">
           <h2 class="font-semibold">Upload form failed to mount</h2>

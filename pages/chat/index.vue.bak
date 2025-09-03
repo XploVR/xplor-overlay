@@ -1,0 +1,156 @@
+﻿<!-- pages/chat/index.vue -->
+<script setup lang="ts">
+definePageMeta({ layout: 'default' })
+
+import { ref, computed, onMounted } from 'vue'
+import { useChat } from '@/composables/useChat'
+
+const chat = useChat()
+
+/**
+ * Normalize conversations from the composable:
+ * - supports array
+ * - supports ref(array)
+ * - otherwise falls back to []
+ */
+const convos = computed<any[]>(() => {
+  const c: any = (chat as any).conversations
+  if (Array.isArray(c)) return c
+  if (Array.isArray(c?.value)) return c.value
+  return []
+})
+
+const activeId = ref<string | null>(null)
+const active = computed(() => convos.value.find(c => c.id === activeId.value) || null)
+const messages = computed(() => active.value?.messages ?? [])
+
+function openConv(id: string) {
+  activeId.value = id
+}
+
+const draft = ref('')
+
+async function send() {
+  const text = draft.value.trim()
+  if (!text || !active.value) return
+  try {
+    await chat.sendMessage(text)
+    draft.value = ''
+  } catch (e) {
+    console.error('sendMessage failed', e)
+  }
+}
+
+onMounted(() => {
+  if (convos.value.length && !activeId.value) {
+    activeId.value = convos.value[0].id
+  }
+})
+</script>
+
+<template>
+  <div class="min-h-dvh bg-black text-white">
+    <div class="container-x py-6">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <!-- Sidebar: conversations -->
+        <aside class="md:col-span-4 lg:col-span-3 rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+          <div class="px-3 py-2 border-b border-white/10">
+            <h1 class="text-sm font-semibold tracking-wide">Chat</h1>
+          </div>
+          <nav class="max-h-[70vh] overflow-y-auto thin-scroll divide-y divide-white/5">
+            <button
+              v-for="c in convos"
+              :key="c.id"
+              class="w-full text-left px-3 py-3 hover:bg-white/[0.06] transition flex items-start gap-3"
+              :class="activeId === c.id ? 'bg-white/[0.08]' : ''"
+              @click="openConv(c.id)"
+            >
+              <div class="shrink-0 h-8 w-8 rounded-full bg-white/10 grid place-items-center text-xs">
+                {{ (c.title || c.id || '?').slice(0,2).toUpperCase() }}
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm font-medium truncate">
+                  {{ c.title || 'Conversation ' + c.id }}
+                </div>
+                <div class="text-xs text-white/60 truncate">
+                  {{ (c.preview || c.lastMessage || 'No messages yet') }}
+                </div>
+              </div>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- Main: messages -->
+        <section class="md:col-span-8 lg:col-span-9 rounded-2xl border border-white/10 bg-white/[0.04] flex flex-col min-h-[60vh]">
+          <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+            <div class="font-medium">
+              {{ active?.title || 'Select a conversation' }}
+            </div>
+            <div class="text-xs text-white/60">
+              {{ messages.length }} message{{ messages.length === 1 ? '' : 's' }}
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-3 space-y-2 thin-scroll">
+            <!-- IMPORTANT: this template MUST be closed -->
+            <template v-if="activeId">
+              <div
+                v-for="m in messages"
+                :key="m.id || (m.role + (m.createdAt || '') + (m.text || ''))"
+                class="flex"
+                :class="m.role === 'user' ? 'justify-end' : 'justify-start'"
+              >
+                <div
+                  class="max-w-[85%] rounded-2xl px-3 py-2 text-sm"
+                  :class="m.role === 'user' ? 'bg-xplor-yellow text-black' : 'bg-white/[0.08] text-white'"
+                >
+      <div v-if="m.meta?.sender" class="text-[10px] opacity-70 mb-0.5">
+        {{ m.meta.sender }}
+      </div>
+      <div class="whitespace-pre-wrap break-words">{{ m.text }}</div>
+      <div v-if="m.createdAt" class="text-[10px] opacity-50 mt-1">
+        {{ new Date(m.createdAt).toLocaleString() }}
+      </div>
+    </div>
+  </div>
+</template>
+
+            <template v-else>
+              <div class="h-full grid place-items-center text-sm text-white/60">
+                Pick a conversation on the left to start chatting.
+              </div>
+            </template>
+          </div>
+
+          <!-- Composer -->
+          <div class="p-3 border-t border-white/10">
+            <div class="flex gap-2">
+              <input
+                v-model="draft"
+                :disabled="!activeId"
+                class="flex-1 rounded-xl border border-white/15 bg-black/30 px-3 py-2 placeholder:text-white/40"
+                placeholder="Type a message…"
+                @keydown.enter.exact.prevent="send"
+              />
+              <button
+                class="px-4 py-2 rounded-xl bg-xplor-yellow text-black disabled:opacity-50"
+                :disabled="!activeId || !draft.trim()"
+                @click="send"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.thin-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
+.thin-scroll::-webkit-scrollbar { width: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.22); border-radius: 8px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+</style>
+

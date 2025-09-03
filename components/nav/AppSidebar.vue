@@ -10,6 +10,7 @@ const route = useRoute()
 /** PAGES (top group) */
 const pages = [
   { key: 'dashboard', label: 'Dashboard', to: '/dashboard' },
+  { key: 'chat',      label: 'Chat',      to: '/chat' },
   { key: 'about',     label: 'About',     to: '/about' },
   { key: 'fairseas',  label: 'FairSeas',  to: '/fairseas' },
   { key: 'faqs',      label: 'FAQs',      to: '/faqs' },
@@ -51,6 +52,9 @@ function Icon (name: string, cls = 'w-5 h-5') {
     case 'faqs':         return h('svg', base, [h('path', { d:'M12 18v-2a4 4 0 1 0-4-4' }), h('circle', { cx:12, cy:19, r:1 })])
     case 'pros':         return h('svg', base, [h('path', { d:'M12 3l3 7h7l-5.5 4 2 7-6.5-4.5L5 21l2-7L2 10h7z' })])
     case 'gear':         return h('svg', base, [h('path', { d:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0-5l2 2 3-1 1 3 3 1-1 3 2 2-2 2 1 3-3 1-1 3-3-1-2 2-2-2-3 1-1-3-3-1 1-3-2-2 2-2-1-3 3-1 1-3 3 1 2-2z' })])
+    case 'chat':        return h('svg', base, [
+                         h('path', { d:'M21 15a4 4 0 0 1-4 4H9l-4 3v-3H5a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v8z' })
+                       ])
     default:             return h('svg', base, [h('circle', { cx:12, cy:12, r:8 })])
   }
 }

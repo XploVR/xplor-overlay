@@ -1,0 +1,212 @@
+﻿// /composables/useChat.ts
+import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js'
+
+type Conversation = { id: string; kind: 'dm' | 'group' | 'system'; title: string | null; created_at: string }
+type Message = {
+  id: string
+  conversation_id: string
+  sender_id: string | null
+  body: string | null
+  attachment_url: string | null
+  attachment_meta: any | null
+  created_at: string
+}
+
+export function useChat() {
+  const supabase = useSupabaseClient<SupabaseClient>()
+  const user = useSupabaseUser()
+
+  const conversations = ref<Conversation[]>([])
+  const activeId = ref<string | null>(null)
+  const messages = ref<Message[]>([])
+  const loading = ref(false)
+  const uploading = ref(false)
+  const lastError = ref<string | null>(null)
+
+  const myUserId = computed(() => user.value?.id ?? null)
+  const lastReadByConv = reactive<Record<string, string | null>>({})
+  const unreadCounts = reactive<Record<string, number>>({})
+  const totalUnread = computed(() => Object.values(unreadCounts).reduce((a,b)=>a+(b||0),0))
+  const currentMessages = computed(() => messages.value)
+
+  let activeConvChannel: RealtimeChannel | null = null
+  let inboxChannel: RealtimeChannel | null = null
+
+  function requireAuth() {
+    if (!myUserId.value) {
+      const msg = 'You must be signed in to use chat.'
+      lastError.value = msg
+      throw new Error(msg)
+    }
+  }
+
+  async function loadConversations() {
+    loading.value = true
+    lastError.value = null
+    if (!myUserId.value) { conversations.value = []; loading.value = false; return }
+
+    const { data, error } = await supabase
+      .from('conversation_participants')
+      .select(conversation:conversations ( id, kind, title, created_at ), conversation_id, last_read_at)
+      .eq('user_id', myUserId.value)
+      .order('conversation(created_at)', { ascending: false })
+
+    if (error) { lastError.value = error.message; loading.value = false; throw new Error(error.message) }
+
+    const rows = data ?? []
+    conversations.value = rows.map((r:any)=>r.conversation).filter(Boolean)
+
+    for (const r of rows) lastReadByConv[r.conversation_id] = r.last_read_at ?? null
+    for (const c of conversations.value) if (!(c.id in lastReadByConv)) lastReadByConv[c.id] = null
+
+    await Promise.all(conversations.value.map(c => refreshUnreadFor(c.id)))
+
+    attachInboxRealtime()
+    loading.value = false
+  }
+
+  function attachInboxRealtime() {
+    if (inboxChannel) supabase.removeChannel(inboxChannel)
+    inboxChannel = supabase
+      .channel('chat:inbox')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const m = payload.new as Message
+          if (m.sender_id && myUserId.value && m.sender_id === myUserId.value) return
+          if (activeId.value === m.conversation_id) { messages.value = [...messages.value, m]; return }
+          const last = lastReadByConv[m.conversation_id]
+          if (!last || new Date(m.created_at).getTime() > new Date(last).getTime()) {
+            unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1
+          }
+        }
+      ).subscribe()
+  }
+
+  async function openConversation(id: string) {
+    activeId.value = id
+    lastError.value = null
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: true })
+      .limit(1000)
+    if (error) { lastError.value = error.message; throw new Error(error.message) }
+    messages.value = data ?? []
+
+    if (activeConvChannel) supabase.removeChannel(activeConvChannel)
+    activeConvChannel = supabase
+      .channel(\chat:conv:\\)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: \conversation_id=eq.\\ },
+        (payload) => { messages.value = [...messages.value, payload.new as Message] }
+      ).subscribe()
+
+    await markConversationRead(id)
+  }
+
+  async function markConversationRead(conversationId: string) {
+    if (!myUserId.value) return
+    const now = new Date().toISOString()
+    const { error } = await supabase
+      .from('conversation_participants')
+      .upsert({ conversation_id: conversationId, user_id: myUserId.value, last_read_at: now }, { onConflict: 'conversation_id,user_id' })
+    if (error) { lastError.value = error.message; throw new Error(error.message) }
+    lastReadByConv[conversationId] = now
+    unreadCounts[conversationId] = 0
+  }
+
+  async function refreshUnreadFor(conversationId: string) {
+    if (!myUserId.value) { unreadCounts[conversationId] = 0; return }
+    const last = lastReadByConv[conversationId]
+    let q = supabase.from('messages').select('id', { count: 'exact', head: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', myUserId.value)
+    if (last) q = q.gt('created_at', last)
+    const { count, error } = await q
+    if (error) { lastError.value = error.message; throw new Error(error.message) }
+    unreadCounts[conversationId] = count ?? 0
+  }
+
+  async function sendMessage(body: string) {
+    if (!activeId.value || !body.trim()) return
+    requireAuth()
+    const { error } = await supabase.from('messages').insert({
+      conversation_id: activeId.value,
+      sender_id: myUserId.value,
+      body
+    })
+    if (error) { lastError.value = error.message; throw new Error(error.message) }
+    await markConversationRead(activeId.value)
+  }
+
+  async function sendAttachment(file: File) {
+    if (!activeId.value) return
+    requireAuth()
+    uploading.value = true
+    try {
+      const path = \\/\/\_\\
+      const { error: upErr } = await supabase.storage.from('chat-uploads').upload(path, file, { cacheControl: '3600', upsert: false })
+      if (upErr) throw upErr
+      const { data: signed, error: signErr } = await supabase.storage.from('chat-uploads').createSignedUrl(path, 3600)
+      if (signErr) throw signErr
+      const { error: msgErr } = await supabase.from('messages').insert({
+        conversation_id: activeId.value, sender_id: myUserId.value,
+        body: null, attachment_url: signed.signedUrl,
+        attachment_meta: { name: file.name, size: file.size, type: file.type, storage_path: path }
+      })
+      if (msgErr) throw msgErr
+      await markConversationRead(activeId.value)
+    } catch (e:any) {
+      lastError.value = e?.message ?? String(e)
+      throw e
+    } finally {
+      uploading.value = false
+    }
+  }
+
+  async function startConversation(kind: 'dm' | 'group' = 'group', title = 'New Chat') {
+    requireAuth()
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({ kind, title })
+      .select('id, kind, title, created_at')
+      .single()
+    if (error) { lastError.value = error.message; throw new Error(error.message) }
+
+    const now = new Date().toISOString()
+    const { error: pErr } = await supabase
+      .from('conversation_participants')
+      .upsert({ conversation_id: data.id, user_id: myUserId.value, last_read_at: now }, { onConflict: 'conversation_id,user_id' })
+    if (pErr) { lastError.value = pErr.message; throw new Error(pErr.message) }
+
+    conversations.value = [data as Conversation, ...conversations.value]
+    lastReadByConv[data.id] = now
+    unreadCounts[data.id] = 0
+    await openConversation(data.id)
+    return data.id
+  }
+
+  async function setActive(id: string) { return openConversation(id) }
+  function buildMessageDeepLink(messageId: string) {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://xplor.io'
+    return \\/chat/c/\?m=\\
+  }
+
+  onMounted(() => {})
+  onUnmounted(() => {
+    if (activeConvChannel) supabase.removeChannel(activeConvChannel)
+    if (inboxChannel) supabase.removeChannel(inboxChannel)
+  })
+
+  return {
+    conversations, activeId, messages, currentMessages,
+    loading, uploading, myUserId, lastError,
+    unreadCounts, totalUnread,
+    loadConversations, openConversation, setActive, startConversation,
+    sendMessage, sendAttachment, buildMessageDeepLink, refreshUnreadFor, markConversationRead
+  }
+}

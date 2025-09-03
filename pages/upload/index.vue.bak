@@ -351,7 +351,7 @@ function tryParseLatLng(val: string) {
   if (m) { latStr.value = m[1]; lngStr.value = m[3] }
 }
 
-/* ---- MapLibre inline (ESM → CDN fallback) ---- */
+/* ---- MapLibre inline (ESM â†’ CDN fallback) ---- */
 const mapEl = ref<HTMLElement | null>(null)
 let map: any = null
 let maplibregl: any = null
@@ -590,13 +590,13 @@ async function publish() {
         </button>
       </div>
       <div class="text-xs text-x-gray2">
-        Last saved: <span class="font-mono">{{ savedAt || '—' }}</span>
+        Last saved: <span class="font-mono">{{ savedAt || 'â€”' }}</span>
       </div>
     </div>
 
-    <!-- TYPE PICKER (3 × 3) -->
+    <!-- TYPE PICKER (3 Ã— 3) -->
     <section v-if="showTypePicker" class="space-y-4">
-      <p class="text-sm text-x-gray2">Choose what you're uploading:</p>
+      <p class="text-sm text-x-gray2">Choose what youâ€™re uploading:</p>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <button
           v-for="opt in typeOptions"
@@ -686,7 +686,7 @@ async function publish() {
             <input v-model="draft.details.country" class="w-full rounded-xl border px-3 py-2" />
           </label>
           <label class="space-y-1">
-            <span class="text-xs text-x-gray2">Price (€)</span>
+            <span class="text-xs text-x-gray2">Price (â‚¬)</span>
             <input type="number" v-model.number="draft.details.price" class="w-full rounded-xl border px-3 py-2" />
           </label>
           <label class="space-y-1 md:col-span-2">
@@ -715,15 +715,15 @@ async function publish() {
                 {{ r.title }}
               </button>
             </div>
-            <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searching…</div>
+            <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searchingâ€¦</div>
           </div>
         </div>
 
         <!-- Map & lat/lng -->
         <ClientOnly>
-          <div ref="mapEl" class="h-80 rounded-2xl border overflow-hidden"></div>
+          <div ref="mapEl" class="h-80 rounded-2xl border overflow-hidden" ></div>
           <template #fallback>
-            <div class="h-80 rounded-2xl border grid place-items-center text-sm text-x-gray2">Loading map…</div>
+            <div class="h-80 rounded-2xl border grid place-items-center text-sm text-x-gray2">Loading mapâ€¦</div>
           </template>
         </ClientOnly>
 
@@ -778,7 +778,7 @@ async function publish() {
       <section v-if="step === 1" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Primary photos — {{ media.primaryPhotos.length }}/{{ activeLimits.primaryPhotos }}
+            Primary photos â€” {{ media.primaryPhotos.length }}/{{ activeLimits.primaryPhotos }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -802,7 +802,7 @@ async function publish() {
       <section v-if="step === 2" class="space-y-2 card p-4">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Virtual Tours — {{ media.virtualTours.length }}/{{ activeLimits.virtualTours }}
+            Virtual Tours â€” {{ media.virtualTours.length }}/{{ activeLimits.virtualTours }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -841,7 +841,7 @@ async function publish() {
       <section v-if="step === 3" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Videos — {{ media.videos.length }}/{{ activeLimits.videos }}
+            Videos â€” {{ media.videos.length }}/{{ activeLimits.videos }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -870,7 +870,7 @@ async function publish() {
       <section v-if="step === 4" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Drone — {{ media.drone.length }}/{{ activeLimits.drone }}
+            Drone â€” {{ media.drone.length }}/{{ activeLimits.drone }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -887,7 +887,7 @@ async function publish() {
       <section v-if="step === 5" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Floor Plans — {{ media.floorPlans.length }}/{{ activeLimits.floorPlans }}
+            Floor Plans â€” {{ media.floorPlans.length }}/{{ activeLimits.floorPlans }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -909,7 +909,7 @@ async function publish() {
       <section v-if="step === 6" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Documents — {{ media.documents.length }}/{{ activeLimits.documents }}
+            Documents â€” {{ media.documents.length }}/{{ activeLimits.documents }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -926,7 +926,7 @@ async function publish() {
       <section v-if="step === 7" class="space-y-2">
         <div class="flex items-center justify-between">
           <p class="text-sm">
-            Additional — {{ media.additional.length }}/{{ activeLimits.additional }}
+            Additional â€” {{ media.additional.length }}/{{ activeLimits.additional }}
           </p>
           <p v-if="status?.message && status?.type==='error'" class="text-xs text-red-600">{{ status.message }}</p>
         </div>
@@ -953,7 +953,7 @@ async function publish() {
         <div class="flex gap-2">
           <button class="btn btn-ghost" @click="downloadJSON(`xplor_draft_${draftId}`, draft)">Export JSON</button>
           <button class="btn btn-primary" :disabled="publishing" @click="publish">
-            <span v-if="publishing">Publishing…</span>
+            <span v-if="publishing">Publishingâ€¦</span>
             <span v-else>Publish</span>
           </button>
         </div>
@@ -971,3 +971,5 @@ async function publish() {
     </template>
   </div>
 </template>
+
+

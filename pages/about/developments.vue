@@ -11,8 +11,12 @@ useHead({
 <template>
   <div class="min-h-dvh bg-black text-white">
     <section class="relative overflow-hidden">
-      <!-- <div class="absolute inset-0 opacity-45 bg-cover bg-center" :style="{ backgroundImage: `url(${heroDevs})` }" /> -->
-      <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" />
+      <!-- <div class="absolute inset-0 opacity-45 bg-cover bg-center" :style="{ backgroundImage: `url(${heroDevs})` }" ></div>
+<div
+  class="absolute inset-0 pointer-events-none z-[10]
+         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
+</div> -->
+      <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" ></div>
       <div class="relative container-x py-16 md:py-24">
         <div class="max-w-3xl">
           <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">Tell the whole story — before ground breaks.</h1>
@@ -70,3 +74,5 @@ useHead({
     </section>
   </div>
 </template>
+
+

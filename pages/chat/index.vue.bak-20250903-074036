@@ -1,0 +1,213 @@
+﻿<script setup lang="ts">
+import { onMounted, ref, computed } from "vue"
+import { useChat } from "~/composables/useChat"
+
+type IdLike = string | number
+type Conv = { id: IdLike; title?: string; [k: string]: any }
+type Msg = {
+  id: IdLike
+  body?: string
+  created_at?: string | Date
+  sender_id?: IdLike
+  conversation_id?: IdLike
+  attachment_url?: string
+  attachment_meta?: { name?: string } | null
+}
+
+/** Helper: unwrap possible Ref-like values */
+const val = <T>(maybeRef: any, fallback: T): T =>
+  (maybeRef && typeof maybeRef === "object" && "value" in maybeRef)
+    ? (maybeRef.value as T)
+    : (maybeRef ?? fallback)
+
+const chat = useChat()
+
+/** Unwrap commonly-used refs from the composable */
+const activeId = computed<IdLike | null>(() => val<IdLike | null>(chat.activeId, null))
+const myId = computed<IdLike | null>(() => val<IdLike | null>(chat.myUserId, null))
+const lastError = computed<string | null>(() => val<string | null>(chat.lastError, null))
+
+/** Always resolve to arrays */
+const conversations = computed<Conv[]>(() => {
+  const c = val<any>(chat.conversations, [])
+  if (Array.isArray(c)) return c as Conv[]
+  if (Array.isArray(c?.items)) return c.items as Conv[]
+  return []
+})
+
+const allMessages = computed<Msg[]>(() => {
+  const m = val<any>(chat.currentMessages, [])
+  if (Array.isArray(m)) return m as Msg[]
+  if (Array.isArray(m?.items)) return m.items as Msg[]
+  return []
+})
+
+const input = ref("")
+
+function pick(id: IdLike) {
+  try { chat.setActive?.(id as any) } catch (e) { console.error("setActive failed:", e) }
+}
+
+async function send() {
+  const text = input.value.trim()
+  if (!text) return
+  input.value = ""
+  try { await chat.sendMessage?.(text) } catch (e:any) { console.error("sendMessage failed:", e?.message ?? e) }
+}
+
+async function newConversation() {
+  try {
+    const id = await chat.startConversation?.("group", "General")
+    if (id) await chat.setActive?.(id as any)
+  } catch (e:any) {
+    console.error("startConversation failed:", e?.message ?? e)
+  }
+}
+
+/** Compute last message per conversation */
+const conversationsWithLastMessage = computed(() => {
+  const convs = conversations.value
+  const msgs = allMessages.value
+
+  return convs.map((conv) => {
+    const lastMsg = msgs
+      .filter(m => String(m.conversation_id ?? "") === String(conv.id ?? ""))
+      .sort((a, b) => {
+        const at = new Date(a?.created_at ?? 0).getTime()
+        const bt = new Date(b?.created_at ?? 0).getTime()
+        return bt - at
+      })[0]
+    return { ...conv, lastMessage: lastMsg?.body || "No messages yet" }
+  })
+})
+
+onMounted(async () => {
+  try { await chat.loadConversations?.() } catch (e:any) { console.error("loadConversations failed:", e?.message ?? e) }
+
+  if (!conversations.value.length) {
+    await newConversation()
+  } else if (!activeId.value) {
+    try { await chat.setActive?.(conversations.value[0]?.id as any) } catch (e:any) { console.error("setActive (default) failed:", e?.message ?? e) }
+  }
+})
+</script>
+
+<template>
+  <div class="h-full flex">
+    <!-- Left: Conversations -->
+    <aside class="w-72 border-r border-white/10 bg-white/[0.03] hidden md:flex flex-col">
+      <div class="px-3 py-3 border-b border-white/10">
+        <h2 class="text-sm font-medium">Conversations</h2>
+      </div>
+
+      <div class="flex-1 overflow-y-auto thin-scroll p-2">
+        <ul class="space-y-1">
+          <li v-for="c in conversationsWithLastMessage" :key="String(c.id)">
+            <button
+              @click="pick(c.id)"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.08]"
+              :class="String(c.id) === String(activeId ?? '') ? 'bg-white/[0.08]' : ''"
+            >
+              <div class="text-sm font-medium truncate">{{ c.title || 'Untitled' }}</div>
+              <div class="text-xs text-white/60 truncate">{{ c.lastMessage }}</div>
+            </button>
+          </li>
+
+          <li v-if="!conversationsWithLastMessage.length" class="px-3 py-2 text-xs text-white/60">
+            No conversations yet.
+          </li>
+        </ul>
+      </div>
+
+      <div class="p-2 border-t border-white/10">
+        <button
+          class="w-full px-3 py-2 rounded-lg border border-white/15 hover:bg-white/[0.06] text-sm"
+          @click="newConversation"
+        >
+          + New conversation
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right: Messages panel -->
+    <div class="flex-1 flex flex-col">
+      <div class="px-3 py-3 border-b border-white/10">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-medium">
+            {{ (conversations.find(c => String(c.id) === String(activeId ?? ''))?.title) || 'Chat' }}
+          </div>
+          <div class="text-xs text-white/60">
+            {{ allMessages.length }} message<span v-if="allMessages.length !== 1">s</span>
+          </div>
+        </div>
+
+        <!-- Error banner (from useChat.lastError) -->
+        <div v-if="lastError" class="mt-2 text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded-md px-2 py-1">
+          {{ lastError }}
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-2 thin-scroll">
+        <template v-if="activeId">
+          <div
+            v-for="m in allMessages"
+            :key="String(m.id)"
+            class="max-w-[72ch] px-3 py-2 rounded-xl border border-white/10"
+            :class="String(m.sender_id ?? '') === String(myId ?? '') ? 'ml-auto bg-white/[0.06]' : 'mr-auto bg-white/[0.03]'"
+          >
+            <div class="text-xs uppercase tracking-wide text-white/50 mb-1">
+              {{ String(m.sender_id ?? '') === String(myId ?? '') ? 'You' : 'Other' }}
+            </div>
+
+            <div class="whitespace-pre-wrap leading-relaxed text-sm">
+              {{ m.body || 'No content' }}
+            </div>
+
+            <div v-if="m.attachment_url" class="mt-2">
+              <a
+                :href="m.attachment_url"
+                target="_blank"
+                class="text-xs hover:underline"
+              >
+                📎 {{ m.attachment_meta?.name || 'Attachment' }}
+              </a>
+            </div>
+          </div>
+
+          <div v-if="!allMessages.length" class="text-xs text-white/60 px-3">
+            No messages in this conversation yet.
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="h-full grid place-items-center text-sm text-white/60">
+            Pick or start a conversation
+          </div>
+        </template>
+      </div>
+
+      <div class="p-3 border-t border-white/10">
+        <form class="flex gap-2" @submit.prevent="send">
+          <input
+            v-model="input"
+            placeholder="Type a message…"
+            class="flex-1 rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2 focus:outline-none"
+          />
+          <button class="px-4 py-2 rounded-xl border border-white/15 hover:bg-white/[0.08]">
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.thin-scroll { 
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(255,255,255,.25) transparent; 
+}
+.thin-scroll::-webkit-scrollbar { width: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.22); border-radius: 8px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+</style>

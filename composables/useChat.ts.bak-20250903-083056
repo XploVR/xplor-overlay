@@ -1,0 +1,125 @@
+﻿// /composables/useChat.ts
+import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js'
+
+type Conversation = { id: string; kind: 'dm' | 'group' | 'system'; title: string | null; created_at: string }
+type Message = {
+  id: string
+  conversation_id: string
+  sender_id: string | null
+  body: string | null
+  attachment_url: string | null
+  attachment_meta: any | null
+  created_at: string
+}
+
+export function useChat() {
+  const supabase = useSupabaseClient<SupabaseClient>()
+  const user = useSupabaseUser()
+
+  const conversations = ref<Conversation[]>([])
+  const activeId = ref<string | null>(null)
+  const messages = ref<Message[]>([])
+  const loading = ref(false)
+  const uploading = ref(false)
+  const lastError = ref<string | null>(null)
+
+  const myUserId = computed(() => user.value?.id ?? null)
+  const lastReadByConv = reactive<Record<string, string | null>>({})
+  const unreadCounts = reactive<Record<string, number>>({})
+  const totalUnread = computed(() => Object.values(unreadCounts).reduce((a,b)=>a+(b||0),0))
+  const currentMessages = computed(() => messages.value)
+
+  let activeConvChannel: RealtimeChannel | null = null
+  let inboxChannel: RealtimeChannel | null = null
+
+  function requireAuth() {
+    if (!myUserId.value) {
+      const msg = 'You must be signed in to use chat.'
+      lastError.value = msg
+      throw new Error(msg)
+    }
+  }
+
+  async function loadConversations() {
+    loading.value = true
+    lastError.value = null
+    if (!myUserId.value) { conversations.value = []; loading.value = false; return }
+
+    const { data, error } = await supabase
+      .from('conversation_participants')
+      .select('conversation:conversations ( id, kind, title, created_at ), conversation_id, last_read_at')
+  .eq('user_id', myUserId.value)
+      .order('created_at', { ascending: false, foreignTable: 'conversations' })
+
+    if (error) { lastError.value = error.message; loading.value = false; throw new Error(error.message) }
+
+    const rows = data ?? []
+    conversations.value = rows.map((r:any)=>r.conversation).filter(Boolean)
+
+    for (const r of rows) lastReadByConv[r.conversation_id] = r.last_read_at ?? null
+    for (const c of conversations.value) if (!(c.id in lastReadByConv)) lastReadByConv[c.id] = null
+
+    await Promise.all(conversations.value.map(c => refreshUnreadFor(c.id)))
+
+    attachInboxRealtime()
+    loading.value = false
+  }
+
+  function attachInboxRealtime() {
+    if (inboxChannel) supabase.removeChannel(inboxChannel)
+    inboxChannel = supabase
+      .channel('chat:inbox')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const m = payload.new as Message
+          if (m.sender_id && myUserId.value && m.sender_id === myUserId.value) return
+          if (activeId.value === m.conversation_id) { messages.value = [...messages.value, m]; return }
+          const last = lastReadByConv[m.conversation_id]
+          if (!last || new Date(m.created_at).getTime() > new Date(last).getTime()) {
+            unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1
+          }
+        }
+      ).subscribe()
+  }
+
+  async function openConversation(id: string) {
+  activeId.value = id
+  lastError.value = null
+
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', id)
+    .order('created_at', { ascending: true })
+    .limit(1000)
+
+  if (error) {
+    lastError.value = error.message
+    throw new Error(error.message)
+  }
+
+  messages.value = (data ?? []) as Message[]
+
+  // Realtime for this conversation only
+  if (activeConvChannel) supabase.removeChannel(activeConvChannel)
+  activeConvChannel = supabase
+    .channel(chat:conv:)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages', filter: conversation_id=eq. },
+      payload => {
+        const m = payload.new as Message
+        messages.value = [...messages.value, m]
+      }
+    )
+    .subscribe()
+
+  await markConversationRead(id)
+}
+
+
+
+

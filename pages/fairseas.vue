@@ -1,4 +1,4 @@
-<!-- pages/fairseas.vue -->
+﻿<!-- pages/fairseas.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-next'
@@ -8,14 +8,14 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
   <div class="min-h-dvh bg-black text-white">
     <!-- HERO -->
     <section class="relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/70" />
+      <div class="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/70" ></div>
       <div class="relative container-x py-16 md:py-24 text-center">
         <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
           FairSeas by Xplor
         </h1>
         <p class="mt-4 text-lg text-white/80 max-w-3xl mx-auto">
-          The world’s first brokerage model that shares
-          <strong>50% of charter commission with the crew</strong> — because crew are the ones who make
+          The worldâ€™s first brokerage model that shares
+          <strong>50% of charter commission with the crew</strong> â€” because crew are the ones who make
           every charter unforgettable.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
@@ -37,12 +37,12 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
           <p class="mt-3 text-white/80">
             FairSeas is simple: we give <strong>half of our charter commission directly to the crew</strong>.
             When Xplor is central agent, that means <strong>double the payout</strong> compared to a standard
-            brokerage model. No smoke and mirrors — transparent, fair, crew-first.
+            brokerage model. No smoke and mirrors â€” transparent, fair, crew-first.
           </p>
           <ul class="mt-6 space-y-2 text-sm text-white/70">
-            <li>• 50% of Xplor’s commission shared with the crew</li>
-            <li>• Direct reward for those who actually deliver the charter experience</li>
-            <li>• Central-agent deals mean bigger payouts for the team onboard</li>
+            <li>â€¢ 50% of Xplorâ€™s commission shared with the crew</li>
+            <li>â€¢ Direct reward for those who actually deliver the charter experience</li>
+            <li>â€¢ Central-agent deals mean bigger payouts for the team onboard</li>
           </ul>
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-8 text-center">
@@ -58,8 +58,8 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
       <div class="container-x">
         <h2 class="text-3xl font-semibold tracking-tight text-center">FairSeas Ratings System</h2>
         <p class="mt-3 text-center text-white/80 max-w-2xl mx-auto">
-          Tips aren’t always fair. That’s why we’re introducing an optional
-          <strong>Crew Rating Index (CRI+)</strong> — an objective way to divide
+          Tips arenâ€™t always fair. Thatâ€™s why weâ€™re introducing an optional
+          <strong>Crew Rating Index (CRI+)</strong> â€” an objective way to divide
           onboard commission bonuses.
         </p>
 
@@ -91,7 +91,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
     <section class="container-x py-14 md:py-16">
       <h2 class="text-3xl font-semibold tracking-tight text-center">Ratings Beyond the Crew</h2>
       <p class="mt-3 text-center text-white/80 max-w-3xl mx-auto">
-        FairSeas doesn’t stop with crew. We’re also creating transparent ratings for
+        FairSeas doesnâ€™t stop with crew. Weâ€™re also creating transparent ratings for
         <strong>management companies, owners, and charter guests</strong>. Everyone
         in the ecosystem benefits when accountability is clear.
       </p>
@@ -119,7 +119,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
       <div class="container-x text-center">
         <h2 class="text-3xl font-semibold tracking-tight">Coming Soon: Sales Commissions</h2>
         <p class="mt-4 text-white/80 max-w-3xl mx-auto">
-          For yachts sold via Xplor, we’re building a way to reward crew with a portion of the sales commission.
+          For yachts sold via Xplor, weâ€™re building a way to reward crew with a portion of the sales commission.
           Because behind every sale is a team that maintained, presented, and operated the yacht.
         </p>
       </div>
@@ -130,7 +130,7 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
       <div class="container-x text-center">
         <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">The industry needs a revolution</h2>
         <p class="mt-3 text-white/80 max-w-3xl mx-auto">
-          FairSeas is built for the people who matter most — the crew.  
+          FairSeas is built for the people who matter most â€” the crew.  
           You are the heart of yachting. You make every trip possible.  
           Now, you finally share in the rewards.
         </p>
@@ -142,3 +142,4 @@ import { Users, Star, DollarSign, Ship, Award, TrendingUp } from 'lucide-vue-nex
     </section>
   </div>
 </template>
+

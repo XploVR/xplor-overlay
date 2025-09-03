@@ -8,7 +8,7 @@ import { Camera, Users, TrendingUp, Star, DollarSign, Globe, Layers, Rocket } fr
   <div class="min-h-dvh bg-black text-white">
     <!-- HERO -->
     <section class="relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-black/90" />
+      <div class="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-black/90" ></div>
       <div class="relative container-x py-16 md:py-24 text-center">
         <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
           Become a Tour Pro with Xplor
@@ -191,3 +191,4 @@ import { Camera, Users, TrendingUp, Star, DollarSign, Globe, Layers, Rocket } fr
     </section>
   </div>
 </template>
+
