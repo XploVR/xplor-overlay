@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { MediaItem } from '~/types/media'
 const props = defineProps<{ item: MediaItem; canPrimary?: boolean }>()
 const emit = defineEmits(['remove','primary'])

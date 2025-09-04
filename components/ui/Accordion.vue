@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 const props = defineProps<{ multiple?: boolean }>()
 const openItems = ref<string[]>([])
@@ -19,3 +19,4 @@ provide('accordion', { openItems, toggle })
     <slot />
   </div>
 </template>
+

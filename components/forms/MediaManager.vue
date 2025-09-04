@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 
@@ -89,7 +89,7 @@ const hasItems = computed(() => items.value.length > 0)
       <button v-if="hasItems" @click="saveOrder" class="text-sm underline">Save order</button>
     </div>
 
-    <div v-if="loading">Loading…</div>
+    <div v-if="loading">Loadingâ€¦</div>
     <div v-else-if="err" class="text-red-600">{{ err }}</div>
     <div v-else-if="!hasItems" class="text-gray-600">No media yet.</div>
 
@@ -113,3 +113,4 @@ const hasItems = computed(() => items.value.length > 0)
     </div>
   </div>
 </template>
+

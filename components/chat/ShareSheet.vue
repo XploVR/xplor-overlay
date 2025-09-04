@@ -1,4 +1,4 @@
-<!-- /components/chat/ShareSheet.vue -->
+﻿<!-- /components/chat/ShareSheet.vue -->
 <script setup lang="ts">
 import { useShare } from '~/composables/useShare'
 import { useChat } from '~/composables/useChat'
@@ -47,7 +47,7 @@ async function doNativeShare() {
         </div>
 
         <div v-if="canNativeShare({ url: link })" class="flex">
-          <button class="px-4 py-2 rounded-lg bg-yellow-300 text-black" @click="doNativeShare">Share via device…</button>
+          <button class="px-4 py-2 rounded-lg bg-xplor-yellow text-black" @click="doNativeShare">Share via deviceâ€¦</button>
         </div>
 
         <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -71,12 +71,12 @@ async function doNativeShare() {
           <div class="text-sm text-white/70 mb-2">Forward to another chat</div>
           <div class="flex items-center gap-2">
             <select v-model="forwardTarget" class="flex-1 rounded-lg border border-white/15 bg-transparent px-3 py-2">
-              <option :value="null" disabled>Select conversation…</option>
+              <option :value="null" disabled>Select conversationâ€¦</option>
               <option v-for="c in conversations" :key="c.id" :value="c.id">{{ c.title || c.id }}</option>
             </select>
-            <button class="px-3 py-2 rounded-lg bg-yellow-300 text-black disabled:opacity-60"
+            <button class="px-3 py-2 rounded-lg bg-xplor-yellow text-black disabled:opacity-60"
                     :disabled="!forwardTarget || forwarding" @click="doForward">
-              {{ forwarding ? 'Forwarding…' : 'Forward' }}
+              {{ forwarding ? 'Forwardingâ€¦' : 'Forward' }}
             </button>
           </div>
         </div>
@@ -89,3 +89,4 @@ async function doNativeShare() {
 .fade-enter-active,.fade-leave-active{transition:opacity .15s ease}
 .fade-enter-from,.fade-leave-to{opacity:0}
 </style>
+

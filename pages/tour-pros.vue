@@ -2,28 +2,53 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import { Camera, Users, TrendingUp, Star, DollarSign, Globe, Layers, Rocket } from "lucide-vue-next"
+
+// ✅ Replace this path with a real image that exists in /assets/images/
+import heroTourPros from '@/assets/images/gigs-hero-2.jpg'
 </script>
 
 <template>
   <div class="min-h-dvh bg-black text-white">
-    <!-- HERO -->
-    <section class="relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-black/90" ></div>
-      <div class="relative container-x py-16 md:py-24 text-center">
-        <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
-          Become a Tour Pro with Xplor
-        </h1>
-        <p class="mt-4 text-lg text-white/80 max-w-3xl mx-auto">
-          Join the platform that transforms your skills into a scalable business.
-          Deliver premium virtual tours, grow your income, and stand out as a leader in immersive media.
-        </p>
-        <div class="mt-8 flex flex-wrap justify-center gap-3">
-          <NuxtLink to="/contact" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
-            Join the Affiliate Program
-          </NuxtLink>
-          <NuxtLink to="/upload" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">
-            Try Uploading a Tour
-          </NuxtLink>
+    <!-- HERO (image + same shading/gradient as about/index.vue) -->
+    <section class="relative h-[34vh] md:h-[36vh] w-full overflow-hidden">
+      <!-- Background image -->
+      <div
+        class="absolute inset-0 bg-cover bg-center z-0 pointer-events-none"
+        :style="{ backgroundImage: `url('${heroTourPros}')` }"
+        aria-hidden="true"
+      />
+      <!-- Strong angled shade -->
+      <div
+        class="absolute inset-0 pointer-events-none z-[5]
+               [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)] z-0"
+        aria-hidden="true"
+      ></div>
+      <!-- Subtle blend -->
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent z-[6] z-0 pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Hero content -->
+      <div class="relative z-50 h-full">
+        <div class="container-x h-full px-6 md:px-10">
+          <div class="flex h-full flex-col items-center justify-end pb-10 text-center md:pb-16">
+            <h1 class="text-3xl font-semibold tracking-tight md:text-5xl">
+              Become a Tour Pro with Xplor
+            </h1>
+            <p class="mt-3 max-w-3xl text-white/85 md:text-lg">
+              Join the platform that transforms your skills into a scalable business. Deliver premium virtual tours,
+              grow your income, and stand out as a leader in immersive media.
+            </p>
+            <div class="mt-5 flex flex-wrap justify-center gap-3">
+              <NuxtLink to="/contact" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
+                Join the Affiliate Program
+              </NuxtLink>
+              <NuxtLink to="/upload" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">
+                Try Uploading a Tour
+              </NuxtLink>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -191,4 +216,5 @@ import { Camera, Users, TrendingUp, Star, DollarSign, Globe, Layers, Rocket } fr
     </section>
   </div>
 </template>
+
 

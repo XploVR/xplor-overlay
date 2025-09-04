@@ -10,3 +10,4 @@ onMounted(()=>{ try{ const raw=localStorage.getItem("xplor_recent"); items.value
   </div>
 </template>
 
+

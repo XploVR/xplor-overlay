@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
@@ -16,7 +16,7 @@ let supa: SupabaseClient
 try {
   supa = createClient(env.supabaseUrl, env.supabaseAnonKey)
 } catch (e) {
-  // If env is missing you’ll see it in the page logs
+  // If env is missing youâ€™ll see it in the page logs
 }
 
 /**
@@ -36,11 +36,11 @@ function log(...args: any[]) {
   logs.value.push(args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '))
 }
 
-/** Sanitize filename so Supabase doesn’t reject it (no % in keys, etc.) */
+/** Sanitize filename so Supabase doesnâ€™t reject it (no % in keys, etc.) */
 function makeSafeKey(name: string) {
   return name
     .normalize('NFKD')         // remove diacritics
-    .replace(/[^\w.-]+/g, '-') // anything not [A-Za-z0-9_ . -] → '-'
+    .replace(/[^\w.-]+/g, '-') // anything not [A-Za-z0-9_ . -] â†’ '-'
     .replace(/-+/g, '-')       // collapse multiple '-'
     .replace(/^-|-$/g, '')     // trim leading/trailing '-'
     .toLowerCase()
@@ -79,7 +79,7 @@ async function doUpload() {
     if (!data?.publicUrl) { log('No publicUrl returned for', path); continue }
 
     urls.value.push(data.publicUrl)
-    log('Uploaded OK →', data.publicUrl)
+    log('Uploaded OK â†’', data.publicUrl)
   }
 
   await listObjects()
@@ -137,7 +137,7 @@ async function listObjects() {
       <div v-if="!listing.length" class="text-gray-500">No objects (yet).</div>
       <ul v-else class="list-disc pl-5 text-sm">
         <li v-for="obj in listing" :key="obj.name" class="break-all">
-          {{ obj.name }} <span v-if="obj.updated_at" class="text-gray-500">— {{ new Date(obj.updated_at).toLocaleString() }}</span>
+          {{ obj.name }} <span v-if="obj.updated_at" class="text-gray-500">â€” {{ new Date(obj.updated_at).toLocaleString() }}</span>
         </li>
       </ul>
     </div>
@@ -148,3 +148,4 @@ async function listObjects() {
     </div>
   </div>
 </template>
+

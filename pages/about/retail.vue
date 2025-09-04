@@ -1,4 +1,4 @@
-<!-- pages/about/retail.vue -->
+﻿<!-- pages/about/retail.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
@@ -12,7 +12,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Turn every store into a shoppable destination. xplor helps retailers showcase immersive 360°/3D tours, drive footfall, capture leads, and measure engagement.'
+        'Turn every store into a shoppable destination. xplor helps retailers showcase immersive 360Â°/3D tours, drive footfall, capture leads, and measure engagement.'
     }
   ]
 })
@@ -23,16 +23,15 @@ useHead({
     <!-- HERO -->
     <section class="relative overflow-hidden">
       <div
-        class="absolute inset-0 opacity-100 bg-cover bg-center"
+        class="absolute inset-0 pointer-events-none opacity-100 bg-cover bg-center z-0"
         :style="{ backgroundImage: `url(${heroRetail})` }"
       ></div>
 <div
-  class="absolute inset-0 pointer-events-none z-[10]
-         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
+  class="absolute inset-0 pointer-events-none z-[10] [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)] z-0">
 </div>
       <!-- left-to-right dark overlay for white text legibility -->
-      <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" ></div>
-      <div class="relative container-x py-16 md:py-24">
+      <div class="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/80 via-black/60 to-transparent z-0" ></div>
+      <div class="relative z-50 container-x py-16 md:py-24">
         <div class="max-w-3xl">
           <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
             Retail that customers can step into from anywhere.
@@ -74,7 +73,7 @@ useHead({
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
           <div class="text-lg font-medium">Immersive storefront</div>
           <p class="text-sm text-white/70 mt-1">
-            360Â°/3D walkthroughs showcase layout, collections, and ambience. Perfect for launches,
+            360Ã‚Â°/3D walkthroughs showcase layout, collections, and ambience. Perfect for launches,
             flagships, and pop-ups.
           </p>
         </div>
@@ -89,7 +88,7 @@ useHead({
         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
           <div class="text-lg font-medium">Map discovery</div>
           <p class="text-sm text-white/70 mt-1">
-            Get found on Xplorâ€™s global map. Geo-search drives local footfall and destination retail.
+            Get found on XplorÃ¢â‚¬â„¢s global map. Geo-search drives local footfall and destination retail.
           </p>
         </div>
 
@@ -141,9 +140,9 @@ useHead({
             </p>
 
             <ul class="mt-4 space-y-1 text-sm text-white/70">
-              <li>â€¢ Hotspots: PDP / Lookbook / Promo</li>
-              <li>â€¢ UTM-tracked outbound links</li>
-              <li>â€¢ Multi-language labels</li>
+              <li>Ã¢â‚¬Â¢ Hotspots: PDP / Lookbook / Promo</li>
+              <li>Ã¢â‚¬Â¢ UTM-tracked outbound links</li>
+              <li>Ã¢â‚¬Â¢ Multi-language labels</li>
             </ul>
 
             <div class="mt-6 flex flex-wrap gap-3">
@@ -195,17 +194,17 @@ useHead({
       <div class="rounded-3xl border border-white/10 bg-[radial-gradient(60%_60%_at_30%_20%,rgba(232,247,147,0.12),transparent)] p-6 md:p-10">
         <div class="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 class="text-3xl font-semibold tracking-tight">Built for now ready for whatâ€™s next</h2>
+            <h2 class="text-3xl font-semibold tracking-tight">Built for now ready for whatÃ¢â‚¬â„¢s next</h2>
             <p class="mt-3 text-white/80">
-              Xplorâ€™s geospatial index makes your location discoverable today, while our open approach to
-              tour formats keeps you future-proof. Whether youâ€™re rolling regional pop-ups or opening
+              XplorÃ¢â‚¬â„¢s geospatial index makes your location discoverable today, while our open approach to
+              tour formats keeps you future-proof. Whether youÃ¢â‚¬â„¢re rolling regional pop-ups or opening
               global flagships, your stores live on a platform designed to scale.
             </p>
             <ul class="mt-6 space-y-2 text-sm text-white/70">
-              <li>â€¢ Works with leading 360Â°/3D platforms</li>
-              <li>â€¢ Global map discovery & search</li>
-              <li>â€¢ Privacy controls: Public / Private / PIN</li>
-              <li>â€¢ Pro & Business: analytics, exports, API</li>
+              <li>Ã¢â‚¬Â¢ Works with leading 360Ã‚Â°/3D platforms</li>
+              <li>Ã¢â‚¬Â¢ Global map discovery & search</li>
+              <li>Ã¢â‚¬Â¢ Privacy controls: Public / Private / PIN</li>
+              <li>Ã¢â‚¬Â¢ Pro & Business: analytics, exports, API</li>
             </ul>
 
             <div class="mt-6 flex flex-wrap gap-3">
@@ -227,11 +226,11 @@ useHead({
           <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
             <h3 class="text-xl font-semibold">Retail use cases</h3>
             <ul class="mt-3 space-y-2 text-white/80 text-sm">
-              <li>â€¢ Flagship & concept stores</li>
-              <li>â€¢ Pop-ups & collab drops</li>
-              <li>â€¢ Duty free & travel retail</li>
-              <li>â€¢ Showrooms & wholesale appointments</li>
-              <li>â€¢ Outlet villages & multi-brand halls</li>
+              <li>Ã¢â‚¬Â¢ Flagship & concept stores</li>
+              <li>Ã¢â‚¬Â¢ Pop-ups & collab drops</li>
+              <li>Ã¢â‚¬Â¢ Duty free & travel retail</li>
+              <li>Ã¢â‚¬Â¢ Showrooms & wholesale appointments</li>
+              <li>Ã¢â‚¬Â¢ Outlet villages & multi-brand halls</li>
             </ul>
           </div>
         </div>
@@ -263,5 +262,8 @@ useHead({
     </section>
   </div>
 </template>
+
+
+
 
 

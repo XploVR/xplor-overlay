@@ -1,4 +1,4 @@
-<!-- /components/chat/ConversationList.vue -->
+﻿<!-- /components/chat/ConversationList.vue -->
 <script setup lang="ts">
 defineProps<{ items: any[], activeId: string | null }>()
 const emit = defineEmits<{ (e: 'open', id: string): void }>()
@@ -26,3 +26,4 @@ const emit = defineEmits<{ (e: 'open', id: string): void }>()
 .thin-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.22); border-radius: 8px; }
 .thin-scroll::-webkit-scrollbar-track { background: transparent; }
 </style>
+

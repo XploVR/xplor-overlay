@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { createClient } from '@supabase/supabase-js'
 
 const { public: pub } = useRuntimeConfig()
@@ -49,3 +49,4 @@ async function doUpload() {
     </div>
   </div>
 </template>
+

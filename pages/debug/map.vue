@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import mapboxgl from 'mapbox-gl'
 
@@ -29,3 +29,4 @@ onMounted(() => {
     <div ref="el" style="height:60vh;width:100%;border:1px solid #ddd;"></div>
   </div>
 </template>
+

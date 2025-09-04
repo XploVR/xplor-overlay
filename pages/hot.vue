@@ -284,3 +284,4 @@ const filtered = computed(() => {
 <style scoped>
 .marker { cursor: pointer; }
 </style>
+

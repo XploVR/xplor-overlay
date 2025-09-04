@@ -37,3 +37,4 @@ onBeforeUnmount(() => {
 <template>
   <div ref="el" class="w-full rounded-xl overflow-hidden" style="aspect-ratio: 16 / 9;" />
 </template>
+

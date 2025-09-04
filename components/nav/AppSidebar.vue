@@ -1,4 +1,4 @@
- below is my AppSidebar, please could you add space at the bottom so that all sidebars buttons can be viewed in any zoom % when scrolling to the bottom with scrollbar <!-- components/nav/AppSidebar.vue -->  
+﻿ below is my AppSidebar, please could you add space at the bottom so that all sidebars buttons can be viewed in any zoom % when scrolling to the bottom with scrollbar <!-- components/nav/AppSidebar.vue -->  
 <script setup lang="ts">
 import { h, computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -12,13 +12,13 @@ const pages = [
   { key: 'dashboard', label: 'Dashboard', to: '/dashboard' },
   { key: 'chat',      label: 'Chat',      to: '/chat' },
   { key: 'about',     label: 'About',     to: '/about' },
-  { key: 'fairseas',  label: 'FairSeas',  to: '/fairseas' },
+  { key: 'fairseas',  label: 'FairSeas',  to: '/about/fairseas' },
   { key: 'faqs',      label: 'FAQs',      to: '/faqs' },
   { key: 'pros',      label: 'Tour Pros', to: '/tour-pros' },
   { key: 'gear',      label: 'Equipment', to: '/equipment' },
 ] as const
 
-/** CATEGORIES (bottom group) → link to About pages */
+/** CATEGORIES (bottom group) â†’ link to About pages */
 const cats = [
   { key: 'real_estate',  label: 'Real Estate',        to: '/about/real-estate' },
   { key: 'developments', label: 'Developments',       to: '/about/developments' },
@@ -70,7 +70,7 @@ function Icon (name: string, cls = 'w-5 h-5') {
       <!-- Top: brand + collapse toggle -->
       <div class="flex items-center justify-between px-2 py-1">
         <NuxtLink to="/" class="flex items-center gap-2">
-          <span class="inline-grid place-items-center h-7 w-7 rounded-lg bg-yellow-300 text-black font-bold">X</span>
+          <span class="inline-grid place-items-center h-7 w-7 rounded-lg bg-xplor-yellow text-black font-bold">X</span>
           <span v-if="!isCollapsed" class="font-medium">xplor</span>
         </NuxtLink>
         <button
@@ -78,7 +78,7 @@ function Icon (name: string, cls = 'w-5 h-5') {
           :title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
           @click="toggleCollapsed"
         >
-          <!-- « or » -->
+          <!-- Â« or Â» -->
           <svg v-if="!isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
             <path d="M13.5 6l-6 6 6 6M20 6l-6 6 6 6"/>
           </svg>
@@ -142,8 +142,8 @@ function Icon (name: string, cls = 'w-5 h-5') {
       <div v-if="isOpen" class="fixed inset-y-0 left-0 z-[61] w-[86vw] max-w-[320px] bg-[#0b0b0b] border-r border-white/10 p-3 md:hidden">
         <div class="flex items-center justify-between px-1 py-2">
           <div class="flex items-center gap-2">
-            <span class="inline-grid place-items-center h-8 w-8 rounded-xl bg-yellow-300 text-black font-bold">X</span>
-            <span class="font-medium">Xplor</span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-xplor-yellow text-black font-typografix font-bold">x</span>
+  <span class="font-typografix font-medium tracking-wide">xplor</span>
           </div>
           <button class="px-2 py-1 rounded-lg border border-white/15 text-white/80" @click="closeMobile">Close</button>
         </div>
@@ -192,3 +192,4 @@ function Icon (name: string, cls = 'w-5 h-5') {
 .slide-enter-active, .slide-leave-active { transition: transform .18s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
 </style>
+

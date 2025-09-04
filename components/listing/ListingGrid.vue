@@ -25,3 +25,4 @@ const safe = computed(() => Array.isArray(props.items) ? props.items : [])
     </div>
   </div>
 </template>
+

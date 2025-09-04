@@ -75,3 +75,4 @@ async function upload() {
     <div v-else class="text-gray-600">Create a draft to enable media upload.</div>
   </div>
 </template>
+

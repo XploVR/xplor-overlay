@@ -1,4 +1,4 @@
-<!-- pages/index.vue -->
+﻿<!-- pages/index.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 import landingHero from '@/assets/images/landing-hero.jpg'
@@ -16,17 +16,17 @@ import landingHero from '@/assets/images/landing-hero.jpg'
         <!-- Radial highlight (under the main gradient) -->
         <div
           class="absolute inset-0 pointer-events-none z-[5]
-                 bg-[radial-gradient(circle_at_30%_10%,rgba(232,247,147,0.12),transparent_40%),radial-gradient(circle_at_80%_50%,rgba(232,247,147,0.07),transparent_40%)]">
+                 bg-[radial-gradient(circle_at_30%_10%,rgba(232,247,147,0.12),transparent_40%),radial-gradient(circle_at_80%_50%,rgba(232,247,147,0.07),transparent_40%)] z-0">
         </div>
 
-        <!-- LEFTâ†’RIGHT BLACK GRADIENT OVERLAY (always works, no Tailwind dependency) -->
+        <!-- LEFTÃ¢â€ â€™RIGHT BLACK GRADIENT OVERLAY (always works, no Tailwind dependency) -->
         <div
   class="absolute inset-0 pointer-events-none z-[10]
-         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
+         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)] z-0">
 </div>
 
         <!-- Content -->
-        <div class="absolute inset-0 z-[20] flex items-center">
+        <div class="absolute inset-0 z-[20] flex items-center z-0 pointer-events-none">
           <div class="p-6 md:p-10 max-w-3xl">
             <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">
               <BrandXplor size="10xl" />
@@ -64,12 +64,12 @@ import landingHero from '@/assets/images/landing-hero.jpg'
       <div>
         <h2 class="text-3xl font-semibold tracking-tight">What is xplor?</h2>
         <p class="mt-3 text-white/70">
-          xplor.io lets you publish and discover immersive spaces. Upload 360Â° or 3D tours
+          xplor.io lets you publish and discover immersive spaces. Upload 360Ã‚Â° or 3D tours
           (Matterport, 3DVista, Kuula, custom), geotag them on an interactive Mapbox map,
           and share or embed everywhere no app required.
         </p>
         <ul class="mt-6 space-y-2 text-sm text-white/60">
-          <li> Universal tour support (360°, 3D, video, galleries)</li>
+          <li> Universal tour support (360Â°, 3D, video, galleries)</li>
           <li> Geospatial search & global discovery</li>
           <li> Clean embeds for websites & listings</li>
           <li> Built with Supabase, Mapbox, Nuxt</li>
@@ -109,12 +109,12 @@ import landingHero from '@/assets/images/landing-hero.jpg'
           <h2 class="text-3xl font-semibold tracking-tight">FairSeas by xplor</h2>
           <p class="mt-3 text-white/70">
             FairSeas is our next-gen yacht brokerage model: we share <strong>50% of net charter commission with the crew</strong>.
-            Happy crew → better service → repeat charters.
+            Happy crew â†’ better service â†’ repeat charters.
           </p>
           <ul class="mt-6 space-y-2 text-sm text-white/60">
-            <li>• Transparent commission-sharing (crew-first)</li>
-            <li>• CRI+ (Crew Rating Index) for measurable quality</li>
-            <li>• Owners see higher guest satisfaction & utilization</li>
+            <li>â€¢ Transparent commission-sharing (crew-first)</li>
+            <li>â€¢ CRI+ (Crew Rating Index) for measurable quality</li>
+            <li>â€¢ Owners see higher guest satisfaction & utilization</li>
           </ul>
           <div class="mt-6 flex gap-3">
             <NuxtLink to="/fairseas" class="px-5 py-3 rounded-xl bg-xplor-yellow text-black hover:opacity-90">
@@ -142,7 +142,7 @@ import landingHero from '@/assets/images/landing-hero.jpg'
     <div class="mt-6 grid md:grid-cols-3 gap-4">
       <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
         <div class="text-xl font-medium">1) Upload your space</div>
-        <p class="text-sm text-white/70 mt-1">Add title, location, media (photos, 360Â°, video, 3D).</p>
+        <p class="text-sm text-white/70 mt-1">Add title, location, media (photos, 360Ã‚Â°, video, 3D).</p>
       </div>
       <div class="rounded-xl border border-white/10 bg-white/[0.04] p-5">
         <div class="text-xl font-medium">2) Get discovered</div>
@@ -183,4 +183,5 @@ import landingHero from '@/assets/images/landing-hero.jpg'
     </div>
   </section>
 </template>
+
 

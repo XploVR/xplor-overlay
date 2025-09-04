@@ -1,9 +1,9 @@
-<script setup lang="ts"></script>
+﻿<script setup lang="ts"></script>
 
 <template>
   <div class="rounded-xl border border-white/10 bg-white/[0.04] p-6 text-center">
     <p class="text-sm text-muted-foreground">
-      Advertisement — Powered by <span class="font-semibold">Matterport</span>
+      Advertisement â€” Powered by <span class="font-semibold">Matterport</span>
     </p>
     <a
       href="https://matterport.com"
@@ -15,3 +15,4 @@
     </a>
   </div>
 </template>
+

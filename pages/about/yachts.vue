@@ -11,13 +11,12 @@ useHead({
 <template>
   <div class="min-h-dvh bg-black text-white">
     <section class="relative overflow-hidden">
-      <div class="absolute inset-0 opacity-100 bg-cover bg-center" :style="{ backgroundImage: `url(${heroYachts})` }" ></div>
+      <div class="absolute inset-0 pointer-events-none opacity-100 bg-cover bg-center z-0" :style="{ backgroundImage: `url(${heroYachts})` }" ></div>
 <div
-  class="absolute inset-0 pointer-events-none z-[10]
-         [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)]">
+  class="absolute inset-0 pointer-events-none z-[10] [background:linear-gradient(90deg,rgba(0,0,0,.85)_0%,rgba(0,0,0,.55)_35%,rgba(0,0,0,.20)_65%,rgba(0,0,0,0)_100%)] z-0">
 </div>
-      <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" ></div>
-      <div class="relative container-x py-16 md:py-24">
+      <div class="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/85 via-black/60 to-transparent z-0" ></div>
+      <div class="relative z-50 container-x py-16 md:py-24">
         <div class="max-w-3xl">
           <h1 class="text-4xl md:text-6xl font-semibold tracking-tight">Bring clients onboard — from anywhere.</h1>
           <p class="mt-4 text-lg text-white/80">Tours, plans, specs, and crew info in one shareable page. Perfect for sales and charter funnels.</p>
@@ -75,5 +74,8 @@ useHead({
     </section>
   </div>
 </template>
+
+
+
 
 

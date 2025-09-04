@@ -1,4 +1,4 @@
-<!-- /components/chat/Composer.vue -->
+﻿<!-- /components/chat/Composer.vue -->
 <script setup lang="ts">
 const emit = defineEmits<{ (e: 'send-text', text: string): void, (e: 'send-file', file: File): void }>()
 const text = ref('')
@@ -27,7 +27,8 @@ function onFile(e: Event) {
     </label>
     <textarea v-model="text" rows="1" @keydown="onKey"
               class="flex-1 bg-transparent border border-white/15 rounded-lg px-3 py-2 resize-none"
-              placeholder="Write a message… (⌘/Ctrl + Enter to send)"/>
-    <button class="px-4 py-2 rounded-lg bg-yellow-300 text-black" @click="doSend">Send</button>
+              placeholder="Write a messageâ€¦ (âŒ˜/Ctrl + Enter to send)"/>
+    <button class="px-4 py-2 rounded-lg bg-xplor-yellow text-black" @click="doSend">Send</button>
   </div>
 </template>
+

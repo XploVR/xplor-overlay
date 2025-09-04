@@ -1,4 +1,4 @@
-<!-- app/error.vue -->
+﻿<!-- app/error.vue -->
 <script setup lang="ts">
 const props = defineProps<{ error: any }>()
 </script>
@@ -14,3 +14,4 @@ const props = defineProps<{ error: any }>()
     </div>
   </NuxtLayout>
 </template>
+

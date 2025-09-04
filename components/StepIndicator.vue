@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const props = defineProps<{ steps: string[]; current: number }>()
 </script>
 <template>
@@ -7,7 +7,7 @@ const props = defineProps<{ steps: string[]; current: number }>()
 <span class="h-6 w-6 grid place-items-center rounded-full text-xs"
 :class="i<=current ? 'bg-x-black text-white' : 'bg-x-gray/50 text-x-deep'">{{ i+1 }}</span>
 <span class="text-sm" :class="i<=current ? 'font-medium' : 'text-x-gray2'">{{ s }}</span>
-<span v-if="i<steps.length-1" class="mx-2 text-x-gray2">›</span>
+<span v-if="i<steps.length-1" class="mx-2 text-x-gray2">â€º</span>
 </li>
 </ol>
 </template>

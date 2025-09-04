@@ -1,5 +1,4 @@
-<!-- components/BrandXplor.vue -->
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
@@ -18,6 +17,7 @@ const props = withDefaults(defineProps<{
 
 const sizeClass = computed(() => {
   switch (props.size) {
+    case 'inherit': return 'text-[1em]'   // ← match parent font-size exactly
     case 'xs':  return 'text-xs'
     case 'sm':  return 'text-sm'
     case 'md':  return 'text-base'
@@ -41,16 +41,19 @@ const sizeClass = computed(() => {
   <component
     :is="as"
     :class="[
-      'inline-flex items-center gap-2 align-baseline',
+      'inline-flex items-baseline gap-2 align-baseline',
       glow && 'brand-glow'
     ]"
-    aria-label="xplor"
+    :aria-label="label"
   >
     <span
       v-if="mark"
       class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-xplor-yellow text-black font-bold leading-none select-none"
     >X</span>
 
-    <span class="brand-xplor" :class="sizeClass">{{ label }}</span>
+    <!-- Block + auto width; font size controlled by sizeClass (supports 'inherit') -->
+    <span class="brand-xplor block w-auto leading-none font-typografix" :class="sizeClass">
+      {{ label }}
+    </span>
   </component>
 </template>

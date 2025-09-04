@@ -1,4 +1,4 @@
-<!-- components/geo/AddressPicker.vue -->
+﻿<!-- components/geo/AddressPicker.vue -->
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { useGeocode } from '~/composables/useGeocode'
@@ -168,14 +168,14 @@ onMounted(async () => {
           {{ r.title }}
         </button>
       </div>
-      <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searching…</div>
+      <div v-else-if="searching" class="absolute mt-1 text-xs text-x-gray2">Searchingâ€¦</div>
     </div>
 
     <ClientOnly>
       <div ref="mapEl" :style="{ height: height || '280px' }" class="rounded-2xl border overflow-hidden" />
       <template #fallback>
         <div :style="{ height: height || '280px' }" class="rounded-2xl border grid place-items-center text-sm text-x-gray2">
-          Loading map…
+          Loading mapâ€¦
         </div>
       </template>
     </ClientOnly>
@@ -199,3 +199,4 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+

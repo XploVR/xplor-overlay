@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { inject } from 'vue'
 const props = defineProps<{ value: string }>()
 const { openItems, toggle } = inject<any>('accordion')
@@ -13,3 +13,4 @@ const isOpen = computed(() => openItems.value.includes(props.value))
     </div>
   </div>
 </template>
+

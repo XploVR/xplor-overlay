@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const props = withDefaults(defineProps<{
   label?: string
   accept?: string
@@ -59,3 +59,4 @@ function onDrop(e: DragEvent) {
     />
   </div>
 </template>
+

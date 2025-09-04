@@ -1,4 +1,4 @@
-<!-- /components/chat/MessageBubble.vue -->
+﻿<!-- /components/chat/MessageBubble.vue -->
 <script setup lang="ts">
 const props = defineProps<{
   message: any
@@ -10,7 +10,7 @@ const emit = defineEmits<{ (e: 'share', id: string): void }>()
 <template>
   <div class="flex gap-2 items-end" :class="isOwn ? 'justify-end' : 'justify-start'">
     <div class="max-w-[76%] rounded-2xl p-3"
-         :class="isOwn ? 'bg-yellow-300 text-black' : 'bg-white/[0.06] border border-white/10'">
+         :class="isOwn ? 'bg-xplor-yellow text-black' : 'bg-white/[0.06] border border-white/10'">
       <div v-if="message.attachment_url" class="mb-2">
         <a :href="message.attachment_url" target="_blank" class="underline">Attachment</a>
       </div>
@@ -22,3 +22,4 @@ const emit = defineEmits<{ (e: 'share', id: string): void }>()
     </div>
   </div>
 </template>
+

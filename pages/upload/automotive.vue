@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import FormsUploadWithMedia from '~/components/forms/UploadWithMedia.vue'
 </script>
 
@@ -8,3 +8,4 @@ import FormsUploadWithMedia from '~/components/forms/UploadWithMedia.vue'
     <FormsUploadWithMedia kind="real_estate" />
   </div>
 </template>
+

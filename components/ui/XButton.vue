@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const props = withDefaults(defineProps<{
   variant?: 'primary' | 'ghost' | 'outline'
   size?: 'sm'|'md'|'lg'
@@ -20,3 +20,4 @@ const props = withDefaults(defineProps<{
     <slot />
   </button>
 </template>
+

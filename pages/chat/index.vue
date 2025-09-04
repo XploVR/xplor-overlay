@@ -398,3 +398,4 @@ watchEffect(() => {
 .thin-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.22); border-radius: 8px; }
 .thin-scroll::-webkit-scrollbar-track { background: transparent; }
 </style>
+

@@ -1,4 +1,4 @@
-<!-- pages/faqs.vue -->
+﻿<!-- pages/faqs.vue -->
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
@@ -18,7 +18,7 @@ const faqs: FAQ[] = [
     category: 'General',
     question: 'What is Xplor?',
     answer:
-      "Xplor is a universal platform to publish and discover immersive tours—real estate, yachts, hotels, museums, automotive, aviation, and more. Upload 360°/3D tours, geotag on a live map, embed anywhere, and track engagement."
+      "Xplor is a universal platform to publish and discover immersive toursâ€”real estate, yachts, hotels, museums, automotive, aviation, and more. Upload 360Â°/3D tours, geotag on a live map, embed anywhere, and track engagement."
   },
   {
     category: 'General',
@@ -30,7 +30,7 @@ const faqs: FAQ[] = [
     category: 'General',
     question: 'Which formats do you support?',
     answer:
-      "Matterport, 3DVista, Kuula, and any embeddable 360°/3D/web tour via secure iframe. You can also add photo galleries and video."
+      "Matterport, 3DVista, Kuula, and any embeddable 360Â°/3D/web tour via secure iframe. You can also add photo galleries and video."
   },
 
   // ===== Uploading & Content
@@ -38,13 +38,13 @@ const faqs: FAQ[] = [
     category: 'Uploading',
     question: 'How do I upload a space?',
     answer:
-      "Click “Upload” (or go to /upload). Add a title, location, category, media (tour embed, photos, video), and optional booking/contact links. Save as draft or publish."
+      "Click â€œUploadâ€ (or go to /upload). Add a title, location, category, media (tour embed, photos, video), and optional booking/contact links. Save as draft or publish."
   },
   {
     category: 'Uploading',
     question: 'Do you support bulk imports?',
     answer:
-      "Yes — CSV/Excel bulk upload for large portfolios, with templates per vertical (real estate, yachts, hotels, etc.). Enterprise ingestion (API/webhooks) available on request."
+      "Yes â€” CSV/Excel bulk upload for large portfolios, with templates per vertical (real estate, yachts, hotels, etc.). Enterprise ingestion (API/webhooks) available on request."
   },
   {
     category: 'Uploading',
@@ -64,7 +64,7 @@ const faqs: FAQ[] = [
     category: 'Geospatial & Discovery',
     question: 'What is H3 and why do you use it?',
     answer:
-      "H3 is a hierarchical hex indexing system. It helps Xplor cluster nearby tours, power heatmaps, and enable fast geo-search—even across millions of spaces."
+      "H3 is a hierarchical hex indexing system. It helps Xplor cluster nearby tours, power heatmaps, and enable fast geo-searchâ€”even across millions of spaces."
   },
 
   // ===== Privacy & Safety
@@ -92,7 +92,7 @@ const faqs: FAQ[] = [
     category: 'FairShare & Crew',
     question: 'What is FairShare?',
     answer:
-      "FairShare is Xplor’s yacht-charter model that shares 50% of net charter commission with active crew on eligible yachts—aligning incentives and improving guest experience."
+      "FairShare is Xplorâ€™s yacht-charter model that shares 50% of net charter commission with active crew on eligible yachtsâ€”aligning incentives and improving guest experience."
   },
   {
     category: 'FairShare & Crew',
@@ -112,7 +112,7 @@ const faqs: FAQ[] = [
     category: 'Pricing & Plans',
     question: 'Is it free to list?',
     answer:
-      "Yes — basic listings are free within fair-use limits (media and storage caps). Pro and Business plans unlock bulk uploads, analytics, custom branding, and more."
+      "Yes â€” basic listings are free within fair-use limits (media and storage caps). Pro and Business plans unlock bulk uploads, analytics, custom branding, and more."
   },
   {
     category: 'Pricing & Plans',
@@ -166,7 +166,7 @@ const faqs: FAQ[] = [
     category: 'Accounts & Data',
     question: 'How do I delete my account?',
     answer:
-      "Go to Settings → Account → Delete. We’ll remove personal data per policy; some aggregate/anonymized analytics may be retained."
+      "Go to Settings â†’ Account â†’ Delete. Weâ€™ll remove personal data per policy; some aggregate/anonymized analytics may be retained."
   },
 
   // ===== Support
@@ -236,7 +236,7 @@ useHead({
         v-if="grouped.length === 0"
         class="rounded-xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-muted-foreground"
       >
-        No results for “{{ query }}”. Try different keywords (e.g., “upload”, “privacy”, “FairShare”, “H3”).
+        No results for â€œ{{ query }}â€. Try different keywords (e.g., â€œuploadâ€, â€œprivacyâ€, â€œFairShareâ€, â€œH3â€).
       </div>
 
       <!-- Groups -->
@@ -255,7 +255,7 @@ useHead({
           >
             <summary class="cursor-pointer select-none list-none p-4 font-medium outline-none hover:bg-white/[0.04]">
               <span class="align-middle">{{ faq.question }}</span>
-              <span class="float-right opacity-70 group-open:rotate-180 transition-transform">⌄</span>
+              <span class="float-right opacity-70 group-open:rotate-180 transition-transform">âŒ„</span>
             </summary>
             <div class="px-4 pb-4 -mt-1 text-sm text-foreground/90 whitespace-pre-line">
               {{ faq.answer }}
@@ -269,3 +269,4 @@ useHead({
     </div>
   </div>
 </template>
+

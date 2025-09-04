@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, X, Bell, ShoppingCart } from 'lucide-vue-next'
@@ -17,7 +17,7 @@ const mobileOpen = ref(false)
 const route = useRoute()
 const isActive = (path: string) => computed(() => route.path.startsWith(path))
 
-// (Optional) badges — wire these to your store later
+// (Optional) badges â€” wire these to your store later
 const alertsCount = ref<number>(0)
 const cartCount = ref<number>(0)
 </script>
@@ -30,7 +30,7 @@ const cartCount = ref<number>(0)
         <NuxtLink to="/" class="flex items-center gap-2 font-semibold">
           <!-- Replace with <BrandXplor /> if you have it -->
           <span class="inline-block h-2 w-2 rounded-full bg-xplor-yellow"></span>
-          <span>Xplor</span>
+          <span>xplor</span>
         </NuxtLink>
 
         <!-- Center: Desktop nav -->
@@ -108,3 +108,4 @@ const cartCount = ref<number>(0)
     </div>
   </header>
 </template>
+

@@ -1,9 +1,9 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const cfg = useRuntimeConfig()
 const publicVars = {
   supabaseUrl: cfg.public.supabaseUrl || '(not set)',
-  supabaseAnonKey: cfg.public.supabaseAnonKey ? cfg.public.supabaseAnonKey.slice(0, 8) + '…' : '(not set)',
-  mapboxToken: cfg.public.mapboxToken ? cfg.public.mapboxToken.slice(0, 8) + '…' : '(not set)',
+  supabaseAnonKey: cfg.public.supabaseAnonKey ? cfg.public.supabaseAnonKey.slice(0, 8) + 'â€¦' : '(not set)',
+  mapboxToken: cfg.public.mapboxToken ? cfg.public.mapboxToken.slice(0, 8) + 'â€¦' : '(not set)',
 }
 const serverVars = {
   supabaseServiceRole: !!cfg.supabaseServiceRole ? '(set)' : '(not set)',
@@ -12,7 +12,7 @@ const serverVars = {
 
 <template>
   <div class="max-w-2xl mx-auto p-6 space-y-6">
-    <h1 class="text-2xl font-bold">🔍 Runtime Config Debug</h1>
+    <h1 class="text-2xl font-bold">ðŸ” Runtime Config Debug</h1>
 
     <div class="p-4 rounded bg-gray-100 border">
       <h2 class="font-semibold mb-2">Public Vars</h2>
@@ -29,4 +29,5 @@ const serverVars = {
     </p>
   </div>
 </template>
+
 

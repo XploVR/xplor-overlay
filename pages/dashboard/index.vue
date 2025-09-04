@@ -1,4 +1,4 @@
-<script setup lang="ts">
+ï»¿<script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
 type Privacy = 'public' | 'private' | 'pin'
@@ -143,7 +143,7 @@ function seriesFrom(arr: number[]) {
           'text-emerald-300': !(listingsPending || reqPending || newsPending || areaPending) && !(listingsError || reqError || newsError || areaError)
         }"
       >
-        {{ listingsError || reqError || newsError || areaError ? 'API error' : (listingsPending || reqPending || newsPending || areaPending ? 'Loading…' : 'Live') }}
+        {{ listingsError || reqError || newsError || areaError ? 'API error' : (listingsPending || reqPending || newsPending || areaPending ? 'Loadingâ€¦' : 'Live') }}
       </span>
     </div>
 
@@ -204,7 +204,7 @@ function seriesFrom(arr: number[]) {
     <h2 class="text-xl font-semibold mt-8 mb-3">Area Trends ({{ area }})</h2>
     <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-4">
       <div
-        v-for="k in (areaKpis.length ? areaKpis : [{name:'No data', value:'—', delta:'—'}])"
+        v-for="k in (areaKpis.length ? areaKpis : [{name:'No data', value:'â€”', delta:'â€”'}])"
         :key="k.name"
         class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
       >
@@ -220,7 +220,7 @@ function seriesFrom(arr: number[]) {
     <h2 class="text-xl font-semibold mt-8 mb-3">Access Requests</h2>
     <div class="grid md:grid-cols-3 gap-4">
       <div
-        v-for="r in (accessRequests.length ? accessRequests : [{id:'-',listingId:'—',email:'—',status:'pending', createdAt:new Date().toISOString()}])"
+        v-for="r in (accessRequests.length ? accessRequests : [{id:'-',listingId:'â€”',email:'â€”',status:'pending', createdAt:new Date().toISOString()}])"
         :key="r.id"
         class="rounded-xl border border-white/10 bg-white/[0.05] p-4"
       >
@@ -245,7 +245,7 @@ function seriesFrom(arr: number[]) {
         class="rounded-xl border border-white/10 bg-white/[0.05] p-4 hover:bg-white/[0.08] transition"
       >
         <div class="font-medium">{{ n.title }}</div>
-        <div class="text-xs text-white/60 mt-1">{{ n.source }} <span v-if="n.time">• {{ n.time }}</span></div>
+        <div class="text-xs text-white/60 mt-1">{{ n.source }} <span v-if="n.time">â€¢ {{ n.time }}</span></div>
       </a>
     </div>
 
@@ -267,3 +267,4 @@ function seriesFrom(arr: number[]) {
     <div v-else class="text-white/60 text-sm">No recent items yet. Open a space detail page to populate this.</div>
   </div>
 </template>
+

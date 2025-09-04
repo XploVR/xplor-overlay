@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const { $supabase } = useNuxtApp()
 const user = ref<any | null>(null)
 
@@ -76,3 +76,4 @@ function devSignIn() {
     </div>
   </div>
 </template>
+

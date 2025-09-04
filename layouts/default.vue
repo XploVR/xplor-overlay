@@ -15,7 +15,7 @@ const baseClasses =
 <template>
   <div class="min-h-dvh w-full bg-black text-white">
     <!-- Skip to content (a11y) -->
-    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 px-3 py-2 rounded bg-yellow-300 text-black">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 px-3 py-2 rounded bg-xplor-yellow text-black">
       Skip to content
     </a>
 
@@ -29,16 +29,17 @@ const baseClasses =
 
         <!-- Brand -->
         <NuxtLink to="/" class="flex items-center gap-2">
-          <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-300 text-black font-bold">X</span>
-          <span class="font-medium tracking-wide">xplor</span>
-        </NuxtLink>
+  <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-xplor-yellow text-black font-typografix font-bold">x</span>
+  <span class="font-typografix font-medium tracking-wide">xplor</span>
+</NuxtLink>
+
 
         <!-- Primary nav (header) -->
         <nav class="ml-auto hidden md:flex items-center gap-2">
           <NuxtLink to="/dashboard" class="px-3 py-2 rounded-lg border border-white/15 text-white/80 hover:bg-white/10 transition" active-class="text-white bg-white/10 border-white/20">
             Dashboard
           </NuxtLink>
-          <NuxtLink to="/upload" class="px-3 py-2 rounded-lg bg-yellow-300 text-black hover:opacity-90 transition">
+          <NuxtLink to="/upload" class="px-3 py-2 rounded-lg bg-xplor-yellow text-black hover:opacity-90 transition">
             + Uploads
           </NuxtLink>
           <NuxtLink to="/faqs" class="px-3 py-2 rounded-lg border border-white/15 text-white/80 hover:bg-white/10 transition" active-class="text-white bg-white/10 border-white/20">
@@ -77,3 +78,4 @@ const baseClasses =
     </div>
   </div>
 </template>
+

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 const props = defineProps<{ modelValue: {
   q?: string; kind?: string; city?: string; status?: string; sort?: 'new'|'old'
 } }>()
@@ -19,7 +19,7 @@ function clear() {
   <form @submit.prevent="submit" class="grid grid-cols-1 sm:grid-cols-6 gap-3 items-end">
     <label class="sm:col-span-2 block">
       <div class="text-sm font-medium">Search</div>
-      <input v-model="local.q" class="mt-1 w-full border rounded px-3 py-2" placeholder="Loft, yacht, gallery…" />
+      <input v-model="local.q" class="mt-1 w-full border rounded px-3 py-2" placeholder="Loft, yacht, galleryâ€¦" />
     </label>
 
     <label class="block">
@@ -61,3 +61,4 @@ function clear() {
     </div>
   </form>
 </template>
+

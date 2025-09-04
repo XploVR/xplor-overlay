@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 
 const props = defineProps<{ kind: 'real_estate' | 'yacht' | 'gallery' }>()
@@ -56,7 +56,7 @@ async function submit() {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <label class="block">
         <div class="text-sm font-medium">Title *</div>
-        <input v-model="title" class="mt-1 w-full border rounded px-3 py-2" placeholder="Cozy loft…" />
+        <input v-model="title" class="mt-1 w-full border rounded px-3 py-2" placeholder="Cozy loftâ€¦" />
       </label>
 
       <label class="block">
@@ -76,7 +76,7 @@ async function submit() {
 
       <label class="block sm:col-span-2">
         <div class="text-sm font-medium">Description *</div>
-        <textarea v-model="description" class="mt-1 w-full border rounded px-3 py-2" rows="3" placeholder="Describe the space…"/>
+        <textarea v-model="description" class="mt-1 w-full border rounded px-3 py-2" rows="3" placeholder="Describe the spaceâ€¦"/>
       </label>
 
       <label class="block">
@@ -92,9 +92,10 @@ async function submit() {
 
     <div class="flex items-center gap-3">
       <button @click="submit" :disabled="pending" class="px-4 py-2 rounded bg-black text-white">
-        {{ pending ? 'Creating…' : 'Create draft' }}
+        {{ pending ? 'Creatingâ€¦' : 'Create draft' }}
       </button>
       <span v-if="errorMsg" class="text-red-600">{{ errorMsg }}</span>
     </div>
   </div>
 </template>
+

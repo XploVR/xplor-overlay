@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 type Property = { id:string; title:string; kind:string; city:string; country:string; status:string; created_at:string }
 const { data: items, pending, error } = await useFetch<Property[]>('/api/properties?owner=me', { default: () => [] })
 </script>
@@ -6,7 +6,7 @@ const { data: items, pending, error } = await useFetch<Property[]>('/api/propert
 <template>
   <div class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-semibold mb-4">My Listings</h1>
-    <div v-if="pending">Loading…</div>
+    <div v-if="pending">Loadingâ€¦</div>
     <div v-else-if="error" class="text-red-600">Failed to load.</div>
     <div v-else-if="!items?.length" class="border rounded p-6 text-gray-600">
       No listings yet. <NuxtLink to="/upload" class="underline">Create one</NuxtLink>.
@@ -37,4 +37,5 @@ const { data: items, pending, error } = await useFetch<Property[]>('/api/propert
     </div>
   </div>
 </template>
+
 

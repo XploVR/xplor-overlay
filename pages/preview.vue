@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { ListingDraft } from '~/types/media'
 const draftId = 'draft_001'
 const draft = useLocalStorage<ListingDraft>(`xplor_draft_${draftId}`, null as any)
@@ -10,7 +10,7 @@ const draft = useLocalStorage<ListingDraft>(`xplor_draft_${draftId}`, null as an
 <div v-else class="space-y-4">
 <div class="card p-4">
 <h2 class="font-display text-xl">{{ draft.details.title }}</h2>
-<p class="text-x-gray2">{{ draft.details.city }} • €{{ draft.details.price?.toLocaleString() }}</p>
+<p class="text-x-gray2">{{ draft.details.city }} â€¢ â‚¬{{ draft.details.price?.toLocaleString() }}</p>
 </div>
 <div class="grid md:grid-cols-2 gap-4">
 <img v-for="p in draft.media.primaryPhotos" :key="p.id" :src="p.thumbUrl || p.url || p.blobUrl" class="w-full rounded-xl"/>
@@ -18,3 +18,4 @@ const draft = useLocalStorage<ListingDraft>(`xplor_draft_${draftId}`, null as an
 </div>
 </div>
 </template>
+

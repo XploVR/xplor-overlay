@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-dvh flex items-center justify-center p-8">
     <div class="max-w-md w-full space-y-4 text-center">
       <h1 class="text-2xl font-semibold">Login</h1>
@@ -10,3 +10,4 @@
     </div>
   </div>
 </template>
+

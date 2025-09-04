@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { PropType } from 'vue'
 
 // Keep in sync with your composable type
@@ -64,9 +64,9 @@ function move(idx: number, dir: -1 | 1) {
 
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-1">
-            <button class="btn btn-ghost !px-2" title="Move left" @click="move(i, -1)">←</button>
-            <button class="btn btn-ghost !px-2" title="Move right" @click="move(i, 1)">→</button>
-            <button v-if="primaryMode && !it.primary" class="btn btn-ghost !px-2" title="Set primary" @click="$emit('primary', it.id)">★</button>
+            <button class="btn btn-ghost !px-2" title="Move left" @click="move(i, -1)">â†</button>
+            <button class="btn btn-ghost !px-2" title="Move right" @click="move(i, 1)">â†’</button>
+            <button v-if="primaryMode && !it.primary" class="btn btn-ghost !px-2" title="Set primary" @click="$emit('primary', it.id)">â˜…</button>
           </div>
           <button class="btn btn-ghost !px-2 text-red-600" title="Remove" @click="$emit('remove', it.id)">Delete</button>
         </div>
@@ -74,3 +74,4 @@ function move(idx: number, dir: -1 | 1) {
     </div>
   </div>
 </template>
+
