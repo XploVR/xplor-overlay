@@ -17,9 +17,8 @@ import { Info, FileText } from 'lucide-vue-next'
       <li>• Crew must be <strong>verified and onboard</strong> for the charter period.</li>
       <li>• Payments are conditional on <strong>cleared commission</strong> after charter close-out.</li>
     </ul>
-    <NuxtLink to="/fairseas/fsa.pdf"
-      class="mt-4 inline-flex items-center gap-2 rounded-lg border border-xplor-yellow text-xplor-yellow px-4 py-2 hover:bg-xplor-yellow/10">
-      <FileText class="w-4 h-4" /> View FSA (PDF)
-    </NuxtLink>
+    <a href="/fairseas/FSA.pdf" target="_blank" rel="noopener" class="underline">
+  View FSA (PDF)
+</a>
   </aside>
 </template>

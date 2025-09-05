@@ -102,7 +102,7 @@ useHead({
         <NuxtLink to="/fairseas/crew" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Crew</NuxtLink>
         <NuxtLink to="/fairseas/owners" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Owners</NuxtLink>
         <NuxtLink to="/fairseas/management" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Management</NuxtLink>
-        <NuxtLink to="/fairseas/brokers" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Brokers</NuxtLink>
+        <NuxtLink to="/fairseas/broker" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Brokers</NuxtLink>
         <NuxtLink to="/fairseas/clients" class="px-4 py-2 rounded-lg border border-white/15 hover:bg-white/10">Charter Clients</NuxtLink>
       </div>
     </section>

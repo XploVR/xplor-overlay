@@ -16,7 +16,7 @@ useHead({ title, meta: [{ name: 'description', content: description }] })
         <NuxtLink to="/fairseas/crew" class="px-5 py-3 rounded-xl bg-teal-500 text-black hover:bg-teal-600">Crew Instructions</NuxtLink>
         <NuxtLink to="/fairseas/owners" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Owners</NuxtLink>
         <NuxtLink to="/fairseas/management" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Management</NuxtLink>
-        <NuxtLink to="/fairseas/brokers" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Brokers</NuxtLink>
+        <NuxtLink to="/fairseas/broker" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Brokers</NuxtLink>
         <NuxtLink to="/fairseas/clients" class="px-5 py-3 rounded-xl border border-white/15 hover:bg-white/10">Charter Clients</NuxtLink>
       </template>
     </FairSeasHero>
